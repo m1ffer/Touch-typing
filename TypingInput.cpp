@@ -71,8 +71,7 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
 
     // Обрабатываем Backspace
     if (event->key() == Qt::Key_Backspace) {
-        int lastCorrectSpace = findLastCorrectSpace();
-        if (m_currentPosition > lastCorrectSpace) {
+        if (m_currentPosition > 0) {
             m_currentPosition--;
             checkCharacter(m_currentPosition, QChar());
 
@@ -216,20 +215,4 @@ void TypingInput::updateCursorPosition()
     QTextCursor cursor = textCursor();
     cursor.setPosition(m_currentPosition);
     setTextCursor(cursor);
-}
-
-int TypingInput::findLastCorrectSpace()
-{
-    int lastCorrectSpace = 0;
-
-    // Ищем последний правильно введенный пробел
-    for (int i = 0; i < m_currentPosition; ++i) {
-        if (m_targetText.at(i) == ' ' &&
-            i < toPlainText().length() &&
-            toPlainText().at(i) == m_targetText.at(i)) {
-            lastCorrectSpace = i + 1; // Позиция после пробела
-        }
-    }
-
-    return lastCorrectSpace;
 }

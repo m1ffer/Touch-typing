@@ -56,7 +56,6 @@ private:
     void ensureCursorVisible();
     void checkCharacter(int position, QChar enteredChar);
     void updateCursorPosition();
-    int findLastCorrectSpace();
 
     QColor m_cursorColor;
     QColor m_correctTextColor;
