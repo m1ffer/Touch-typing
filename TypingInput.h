@@ -1,107 +1,71 @@
+// typinginput.h
 #ifndef TYPINGINPUT_H
 #define TYPINGINPUT_H
 
 #include <QWidget>
-#include <QString>
-#include <QTimer>
-#include <QColor>
-#include <QVector>
+#include <QTextEdit>
+#include <QTextCursor>
+#include <QPainter>
+#include <QScrollBar>
+#include <QKeyEvent>
 #include <QFont>
-#include <QScrollArea>
+#include <QTimer>
+#include <QTextCharFormat>
 
-class TypingInput : public QScrollArea
+class TypingInput : public QTextEdit
 {
     Q_OBJECT
-    Q_PROPERTY(QString targetText READ targetText WRITE setTargetText NOTIFY targetTextChanged)
+    Q_PROPERTY(QColor cursorColor READ cursorColor WRITE setCursorColor DESIGNABLE true)
+    Q_PROPERTY(QColor correctTextColor READ correctTextColor WRITE setCorrectTextColor DESIGNABLE true)
+    Q_PROPERTY(QColor incorrectTextColor READ incorrectTextColor WRITE setIncorrectTextColor DESIGNABLE true)
+    Q_PROPERTY(QColor pendingTextColor READ pendingTextColor WRITE setPendingTextColor DESIGNABLE true)
+    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor DESIGNABLE true)
 
 public:
     explicit TypingInput(QWidget *parent = nullptr);
 
-    QString targetText() const { return m_targetText; }
     void setTargetText(const QString &text);
-
     void reset();
-    bool isCompleted() const { return m_currentPosition >= m_targetText.length(); }
-    int currentPosition() const { return m_currentPosition; }
-    int errorsCount() const { return m_errorsCount; }
-    double accuracy() const;
 
-    // Методы для установки цветов
-    void setPendingColor(const QColor &color) { m_pendingColor = color; updateTextWidget(); }
-    void setCorrectColor(const QColor &color) { m_correctColor = color; updateTextWidget(); }
-    void setIncorrectColor(const QColor &color) { m_incorrectColor = color; updateTextWidget(); }
-    void setCursorColor(const QColor &color) { m_cursorColor = color; updateTextWidget(); }
+    QColor cursorColor() const { return m_cursorColor; }
+    void setCursorColor(const QColor &color);
+
+    QColor correctTextColor() const { return m_correctTextColor; }
+    void setCorrectTextColor(const QColor &color) { m_correctTextColor = color; updateTextColors(); }
+
+    QColor incorrectTextColor() const { return m_incorrectTextColor; }
+    void setIncorrectTextColor(const QColor &color) { m_incorrectTextColor = color; updateTextColors(); }
+
+    QColor pendingTextColor() const { return m_pendingTextColor; }
+    void setPendingTextColor(const QColor &color) { m_pendingTextColor = color; updateTextColors(); }
+
+    QColor backgroundColor() const { return m_backgroundColor; }
+    void setBackgroundColor(const QColor &color) { m_backgroundColor = color; updateStyle(); }
 
 signals:
-    void targetTextChanged();
-    void characterTyped(bool correct, QChar character);
-    void typingFinished();
-    void errorMade();
+    void textChanged(const QString &inputText);
+    void inputCompleted();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-    void focusInEvent(QFocusEvent *event) override;
-    void focusOutEvent(QFocusEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-private slots:
-    void toggleCursor();
-
 private:
-    struct TextLine {
-        int startPos;
-        int endPos;
-    };
-
-    class TextDisplayWidget : public QWidget
-    {
-    public:
-        TextDisplayWidget(TypingInput *parent) : QWidget(parent), m_parent(parent) {}
-        QSize sizeHint() const override;
-
-        // Публичный метод для доступа к позиции курсора
-        QPoint getCursorPosition() const;
-
-    protected:
-        void paintEvent(QPaintEvent *event) override;
-
-    private:
-        void drawText(QPainter &painter);
-        void drawCursor(QPainter &painter);
-        int getCharState(int position) const;
-        QColor getColorForState(int state) const;
-
-        TypingInput *m_parent;
-    };
-
-    void updateTextLines();
-    void wrapText();
+    void updateTextColors();
+    void updateStyle();
     void ensureCursorVisible();
-    void updateTextWidget();
+    void checkCharacter(int position, QChar enteredChar);
+    void updateCursorPosition();
+    int findLastCorrectSpace();
+
+    QColor m_cursorColor;
+    QColor m_correctTextColor;
+    QColor m_incorrectTextColor;
+    QColor m_pendingTextColor;
+    QColor m_backgroundColor;
 
     QString m_targetText;
-    QString m_typedText;
     int m_currentPosition;
-    int m_errorsCount;
-    int m_correctChars;
-
-    // Цвета как в MonkeyType
-    QColor m_pendingColor;
-    QColor m_correctColor;
-    QColor m_incorrectColor;
-    QColor m_cursorColor;
-
-    // Курсор
-    bool m_cursorVisible;
-    QTimer *m_cursorTimer;
-
-    // Для многострочного текста
-    QVector<TextLine> m_textLines;
-    bool m_layoutDirty;
-    QFont m_textFont;
-
-    // Виджет для отображения текста
-    TextDisplayWidget *m_textWidget;
 };
 
 #endif // TYPINGINPUT_H

@@ -60,7 +60,6 @@ public:
     QPushButton *pushButton_10;
     QSpacerItem *verticalSpacer_2;
     TypingInput *typingInput;
-    QWidget *scrollAreaWidgetContents;
     QWidget *page_2;
     QGridLayout *gridLayout_6;
     QGridLayout *gridLayout_5;
@@ -222,11 +221,6 @@ public:
 
         typingInput = new TypingInput(page);
         typingInput->setObjectName("typingInput");
-        typingInput->setWidgetResizable(true);
-        scrollAreaWidgetContents = new QWidget();
-        scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 624, 136));
-        typingInput->setWidget(scrollAreaWidgetContents);
 
         gridLayout_15->addWidget(typingInput, 0, 0, 1, 1);
 

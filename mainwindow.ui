@@ -208,21 +208,7 @@
                </spacer>
               </item>
               <item row="0" column="0">
-               <widget class="TypingInput" name="typingInput">
-                <property name="widgetResizable">
-                 <bool>true</bool>
-                </property>
-                <widget class="QWidget" name="scrollAreaWidgetContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>624</width>
-                   <height>136</height>
-                  </rect>
-                 </property>
-                </widget>
-               </widget>
+               <widget class="TypingInput" name="typingInput"/>
               </item>
              </layout>
             </item>
@@ -263,9 +249,8 @@
   </customwidget>
   <customwidget>
    <class>TypingInput</class>
-   <extends>QScrollArea</extends>
+   <extends>QTextEdit</extends>
    <header location="global">TypingInput.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
