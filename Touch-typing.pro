@@ -10,12 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     ControlButton.cpp \
+    TypingInput.cpp \
     controlbtn.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     ControlButton.h \
+    TypingInput.h \
     controlbtn.h \
     mainwindow.h
 

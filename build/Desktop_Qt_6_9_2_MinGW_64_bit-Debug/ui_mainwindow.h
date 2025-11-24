@@ -22,6 +22,7 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <TypingInput.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -39,11 +40,6 @@ public:
     QGridLayout *gridLayout_11;
     QSpacerItem *horizontalSpacer_2;
     QGridLayout *gridLayout_12;
-    QGridLayout *gridLayout_16;
-    QPushButton *learnButton;
-    QPushButton *trainButton;
-    QGridLayout *gridLayout_17;
-    QSpacerItem *verticalSpacer;
     QGridLayout *gridLayout_18;
     QPushButton *pushButton_7;
     QPushButton *pushButton_8;
@@ -55,10 +51,16 @@ public:
     QGridLayout *gridLayout_19;
     ControlButton *settingsButton;
     QSpacerItem *horizontalSpacer_3;
+    QGridLayout *gridLayout_17;
+    QGridLayout *gridLayout_14;
+    QGridLayout *gridLayout_16;
+    QPushButton *learnButton;
+    QPushButton *trainButton;
     QGridLayout *gridLayout_15;
     QPushButton *pushButton_10;
     QSpacerItem *verticalSpacer_2;
-    QGridLayout *gridLayout_14;
+    TypingInput *typingInput;
+    QWidget *scrollAreaWidgetContents;
     QWidget *page_2;
     QGridLayout *gridLayout_6;
     QGridLayout *gridLayout_5;
@@ -106,30 +108,6 @@ public:
 
         gridLayout_12 = new QGridLayout();
         gridLayout_12->setObjectName("gridLayout_12");
-        gridLayout_16 = new QGridLayout();
-        gridLayout_16->setObjectName("gridLayout_16");
-        learnButton = new QPushButton(page);
-        learnButton->setObjectName("learnButton");
-
-        gridLayout_16->addWidget(learnButton, 0, 1, 1, 1);
-
-        trainButton = new QPushButton(page);
-        trainButton->setObjectName("trainButton");
-
-        gridLayout_16->addWidget(trainButton, 0, 0, 1, 1);
-
-
-        gridLayout_12->addLayout(gridLayout_16, 1, 0, 1, 1);
-
-        gridLayout_17 = new QGridLayout();
-        gridLayout_17->setObjectName("gridLayout_17");
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
-
-        gridLayout_17->addItem(verticalSpacer, 0, 0, 1, 1);
-
-
-        gridLayout_12->addLayout(gridLayout_17, 3, 0, 1, 1);
-
         gridLayout_18 = new QGridLayout();
         gridLayout_18->setObjectName("gridLayout_18");
         pushButton_7 = new QPushButton(page);
@@ -206,24 +184,57 @@ public:
 
         gridLayout_12->addLayout(gridLayout_13, 0, 0, 1, 1);
 
-        gridLayout_15 = new QGridLayout();
-        gridLayout_15->setObjectName("gridLayout_15");
-        pushButton_10 = new QPushButton(page);
-        pushButton_10->setObjectName("pushButton_10");
+        gridLayout_17 = new QGridLayout();
+        gridLayout_17->setObjectName("gridLayout_17");
 
-        gridLayout_15->addWidget(pushButton_10, 0, 0, 1, 1);
-
-        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
-
-        gridLayout_15->addItem(verticalSpacer_2, 1, 0, 1, 1);
-
-
-        gridLayout_12->addLayout(gridLayout_15, 4, 0, 1, 1);
+        gridLayout_12->addLayout(gridLayout_17, 3, 0, 1, 1);
 
         gridLayout_14 = new QGridLayout();
         gridLayout_14->setObjectName("gridLayout_14");
 
         gridLayout_12->addLayout(gridLayout_14, 5, 0, 1, 1);
+
+        gridLayout_16 = new QGridLayout();
+        gridLayout_16->setObjectName("gridLayout_16");
+        learnButton = new QPushButton(page);
+        learnButton->setObjectName("learnButton");
+
+        gridLayout_16->addWidget(learnButton, 0, 1, 1, 1);
+
+        trainButton = new QPushButton(page);
+        trainButton->setObjectName("trainButton");
+
+        gridLayout_16->addWidget(trainButton, 0, 0, 1, 1);
+
+
+        gridLayout_12->addLayout(gridLayout_16, 1, 0, 1, 1);
+
+        gridLayout_15 = new QGridLayout();
+        gridLayout_15->setObjectName("gridLayout_15");
+        pushButton_10 = new QPushButton(page);
+        pushButton_10->setObjectName("pushButton_10");
+
+        gridLayout_15->addWidget(pushButton_10, 1, 0, 1, 1);
+
+        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        gridLayout_15->addItem(verticalSpacer_2, 2, 0, 1, 1);
+
+        typingInput = new TypingInput(page);
+        typingInput->setObjectName("typingInput");
+        typingInput->setWidgetResizable(true);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName("scrollAreaWidgetContents");
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 624, 136));
+        typingInput->setWidget(scrollAreaWidgetContents);
+
+        gridLayout_15->addWidget(typingInput, 0, 0, 1, 1);
+
+        gridLayout_15->setRowStretch(0, 1);
+        gridLayout_15->setRowStretch(1, 1);
+        gridLayout_15->setRowStretch(2, 1);
+
+        gridLayout_12->addLayout(gridLayout_15, 4, 0, 1, 1);
 
 
         gridLayout_4->addLayout(gridLayout_12, 0, 1, 1, 1);
@@ -268,14 +279,14 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        learnButton->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
-        trainButton->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         pushButton_7->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         pushButton_8->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         pushButton_9->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         nameLabel->setText(QCoreApplication::translate("MainWindow", "Bebeb", nullptr));
         infoButton->setText(QString());
         settingsButton->setText(QString());
+        learnButton->setText(QCoreApplication::translate("MainWindow", "\320\236\320\261\321\203\321\207\320\265\320\275\320\270\320\265", nullptr));
+        trainButton->setText(QCoreApplication::translate("MainWindow", "\320\242\321\200\320\265\320\275\320\270\321\200\320\276\320\262\320\272\320\260", nullptr));
         pushButton_10->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
     } // retranslateUi
 
