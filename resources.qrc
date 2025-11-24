@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>res/settingsButton.svg</file>
+        <file>res/infoButton.svg</file>
+    </qresource>
+</RCC>

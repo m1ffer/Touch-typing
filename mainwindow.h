@@ -2,22 +2,28 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QButtonGroup>
 
-QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
 }
-QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void onModeChanged(int id);  // Слот для обработки переключения режимов
+
 private:
+    void applyButtonStyle();  // Добавляем объявление метода
+
     Ui::MainWindow *ui;
+    QButtonGroup *modeButtonGroup;
 };
+
 #endif // MAINWINDOW_H
