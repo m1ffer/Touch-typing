@@ -38,6 +38,7 @@ void TypingInput::setCursorColor(const QColor &color)
 void TypingInput::setTargetText(const QString &text)
 {
     m_targetText = text;
+    m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
     m_currentPosition = 0;
     clear();
 
@@ -56,6 +57,7 @@ void TypingInput::setTargetText(const QString &text)
 
 void TypingInput::reset()
 {
+    m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
     m_currentPosition = 0;
     setTargetText(m_targetText);
 }
@@ -69,18 +71,25 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    // Обрабатываем Backspace
+    // Обрабатываем Backspace - ИЗМЕНЕННАЯ ЛОГИКА
     if (event->key() == Qt::Key_Backspace) {
         if (m_currentPosition > 0) {
-            m_currentPosition--;
-            checkCharacter(m_currentPosition, QChar());
+            // Проверяем, является ли текущая позиция опорным пробелом
+            bool isReferenceSpace = (m_currentPosition > 0 &&
+                                     m_targetText[m_currentPosition - 1] == ' ' &&
+                                     m_enteredText[m_currentPosition - 1] == ' ');
 
-            // Обновляем позицию курсора после Backspace
-            updateCursorPosition();
+            if (!isReferenceSpace) {
+                m_currentPosition--;
+                m_enteredText.chop(1);  // Удаляем последний символ из введенного текста
+                checkCharacter(m_currentPosition, QChar());
 
-            // Emit text changed signal
-            QString currentText = toPlainText();
-            emit textChanged(currentText.left(m_currentPosition));
+                // Обновляем позицию курсора после Backspace
+                updateCursorPosition();
+
+                // Emit text changed signal
+                emit textChanged(m_enteredText);
+            }
         }
         return;
     }
@@ -91,9 +100,10 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    // Обрабатываем обычные символы
+    // Обрабатываем обычные символы - ДОБАВЛЕНО сохранение в m_enteredText
     if (!event->text().isEmpty() && m_currentPosition < m_targetText.length()) {
         QChar enteredChar = event->text().at(0);
+        m_enteredText += enteredChar;  // ДОБАВЛЕНО: сохраняем введенный символ
         checkCharacter(m_currentPosition, enteredChar);
         m_currentPosition++;
 
@@ -101,8 +111,7 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
         updateCursorPosition();
 
         // Emit text changed signal
-        QString currentText = toPlainText();
-        emit textChanged(currentText.left(m_currentPosition));
+        emit textChanged(m_enteredText);
 
         ensureCursorVisible();
 

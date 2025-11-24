@@ -197,4 +197,5 @@ void MainWindow::onModeChanged(int id)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete modeButtonGroup;
 }

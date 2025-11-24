@@ -64,6 +64,7 @@ private:
     QColor m_backgroundColor;
 
     QString m_targetText;
+    QString m_enteredText;
     int m_currentPosition;
 };
 
