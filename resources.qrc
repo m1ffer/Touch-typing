@@ -2,5 +2,6 @@
     <qresource prefix="/icons">
         <file>res/settingsButton.svg</file>
         <file>res/infoButton.svg</file>
+        <file>res/resetButton.svg</file>
     </qresource>
 </RCC>

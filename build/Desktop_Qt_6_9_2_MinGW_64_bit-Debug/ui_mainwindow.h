@@ -40,10 +40,23 @@ public:
     QGridLayout *gridLayout_11;
     QSpacerItem *horizontalSpacer_2;
     QGridLayout *gridLayout_12;
-    QGridLayout *gridLayout_18;
-    QPushButton *pushButton_7;
-    QPushButton *pushButton_8;
-    QPushButton *pushButton_9;
+    QGridLayout *gridLayout_14;
+    QStackedWidget *stackedWidget_2;
+    QWidget *page_3;
+    QGridLayout *gridLayout_9;
+    QGridLayout *gridLayout_7;
+    QGridLayout *gridLayout_10;
+    QGridLayout *gridLayout_17;
+    ControlButton *resetButton;
+    QSpacerItem *horizontalSpacer_4;
+    QSpacerItem *horizontalSpacer_5;
+    QSpacerItem *verticalSpacer;
+    TypingInput *typingInput;
+    QGridLayout *gridLayout_15;
+    QPushButton *pushButton_2;
+    QPushButton *pushButton;
+    QPushButton *pushButton_3;
+    QWidget *page_4;
     QGridLayout *gridLayout_13;
     QGridLayout *gridLayout_8;
     QLabel *nameLabel;
@@ -51,15 +64,9 @@ public:
     QGridLayout *gridLayout_19;
     ControlButton *settingsButton;
     QSpacerItem *horizontalSpacer_3;
-    QGridLayout *gridLayout_17;
-    QGridLayout *gridLayout_14;
     QGridLayout *gridLayout_16;
     QPushButton *learnButton;
     QPushButton *trainButton;
-    QGridLayout *gridLayout_15;
-    QPushButton *pushButton_10;
-    QSpacerItem *verticalSpacer_2;
-    TypingInput *typingInput;
     QWidget *page_2;
     QGridLayout *gridLayout_6;
     QGridLayout *gridLayout_5;
@@ -107,25 +114,91 @@ public:
 
         gridLayout_12 = new QGridLayout();
         gridLayout_12->setObjectName("gridLayout_12");
-        gridLayout_18 = new QGridLayout();
-        gridLayout_18->setObjectName("gridLayout_18");
-        pushButton_7 = new QPushButton(page);
-        pushButton_7->setObjectName("pushButton_7");
+        gridLayout_14 = new QGridLayout();
+        gridLayout_14->setObjectName("gridLayout_14");
+        stackedWidget_2 = new QStackedWidget(page);
+        stackedWidget_2->setObjectName("stackedWidget_2");
+        page_3 = new QWidget();
+        page_3->setObjectName("page_3");
+        gridLayout_9 = new QGridLayout(page_3);
+        gridLayout_9->setObjectName("gridLayout_9");
+        gridLayout_7 = new QGridLayout();
+        gridLayout_7->setObjectName("gridLayout_7");
+        gridLayout_10 = new QGridLayout();
+        gridLayout_10->setObjectName("gridLayout_10");
+        gridLayout_17 = new QGridLayout();
+        gridLayout_17->setObjectName("gridLayout_17");
+        resetButton = new ControlButton(page_3);
+        resetButton->setObjectName("resetButton");
+        QIcon icon;
+        icon.addFile(QString::fromUtf8(":/icons/res/resetButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        resetButton->setIcon(icon);
 
-        gridLayout_18->addWidget(pushButton_7, 0, 0, 1, 1);
+        gridLayout_17->addWidget(resetButton, 0, 1, 1, 1);
 
-        pushButton_8 = new QPushButton(page);
-        pushButton_8->setObjectName("pushButton_8");
+        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_18->addWidget(pushButton_8, 0, 1, 1, 1);
+        gridLayout_17->addItem(horizontalSpacer_4, 0, 0, 1, 1);
 
-        pushButton_9 = new QPushButton(page);
-        pushButton_9->setObjectName("pushButton_9");
+        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_18->addWidget(pushButton_9, 0, 2, 1, 1);
+        gridLayout_17->addItem(horizontalSpacer_5, 0, 2, 1, 1);
+
+        gridLayout_17->setColumnStretch(0, 10);
+        gridLayout_17->setColumnStretch(1, 1);
+        gridLayout_17->setColumnStretch(2, 10);
+
+        gridLayout_10->addLayout(gridLayout_17, 1, 0, 1, 1);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        gridLayout_10->addItem(verticalSpacer, 2, 0, 1, 1);
+
+        typingInput = new TypingInput(page_3);
+        typingInput->setObjectName("typingInput");
+
+        gridLayout_10->addWidget(typingInput, 0, 0, 1, 1);
+
+        gridLayout_10->setRowStretch(0, 5);
+        gridLayout_10->setRowStretch(1, 1);
+        gridLayout_10->setRowStretch(2, 5);
+
+        gridLayout_7->addLayout(gridLayout_10, 1, 0, 1, 1);
+
+        gridLayout_15 = new QGridLayout();
+        gridLayout_15->setObjectName("gridLayout_15");
+        pushButton_2 = new QPushButton(page_3);
+        pushButton_2->setObjectName("pushButton_2");
+
+        gridLayout_15->addWidget(pushButton_2, 0, 1, 1, 1);
+
+        pushButton = new QPushButton(page_3);
+        pushButton->setObjectName("pushButton");
+
+        gridLayout_15->addWidget(pushButton, 0, 0, 1, 1);
+
+        pushButton_3 = new QPushButton(page_3);
+        pushButton_3->setObjectName("pushButton_3");
+
+        gridLayout_15->addWidget(pushButton_3, 0, 2, 1, 1);
 
 
-        gridLayout_12->addLayout(gridLayout_18, 2, 0, 1, 1);
+        gridLayout_7->addLayout(gridLayout_15, 0, 0, 1, 1);
+
+        gridLayout_7->setRowStretch(0, 1);
+        gridLayout_7->setRowStretch(1, 10);
+
+        gridLayout_9->addLayout(gridLayout_7, 0, 0, 1, 1);
+
+        stackedWidget_2->addWidget(page_3);
+        page_4 = new QWidget();
+        page_4->setObjectName("page_4");
+        stackedWidget_2->addWidget(page_4);
+
+        gridLayout_14->addWidget(stackedWidget_2, 0, 0, 1, 1);
+
+
+        gridLayout_12->addLayout(gridLayout_14, 2, 0, 1, 1);
 
         gridLayout_13 = new QGridLayout();
         gridLayout_13->setObjectName("gridLayout_13");
@@ -152,9 +225,9 @@ public:
 
         infoButton = new ControlButton(page);
         infoButton->setObjectName("infoButton");
-        QIcon icon;
-        icon.addFile(QString::fromUtf8(":/icons/res/infoButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        infoButton->setIcon(icon);
+        QIcon icon1;
+        icon1.addFile(QString::fromUtf8(":/icons/res/infoButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        infoButton->setIcon(icon1);
 
         gridLayout_13->addWidget(infoButton, 0, 0, 1, 1);
 
@@ -163,9 +236,9 @@ public:
         settingsButton = new ControlButton(page);
         settingsButton->setObjectName("settingsButton");
         settingsButton->setStyleSheet(QString::fromUtf8(""));
-        QIcon icon1;
-        icon1.addFile(QString::fromUtf8(":/icons/res/settingsButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        settingsButton->setIcon(icon1);
+        QIcon icon2;
+        icon2.addFile(QString::fromUtf8(":/icons/res/settingsButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        settingsButton->setIcon(icon2);
 
         gridLayout_19->addWidget(settingsButton, 0, 0, 1, 1);
 
@@ -183,16 +256,6 @@ public:
 
         gridLayout_12->addLayout(gridLayout_13, 0, 0, 1, 1);
 
-        gridLayout_17 = new QGridLayout();
-        gridLayout_17->setObjectName("gridLayout_17");
-
-        gridLayout_12->addLayout(gridLayout_17, 3, 0, 1, 1);
-
-        gridLayout_14 = new QGridLayout();
-        gridLayout_14->setObjectName("gridLayout_14");
-
-        gridLayout_12->addLayout(gridLayout_14, 5, 0, 1, 1);
-
         gridLayout_16 = new QGridLayout();
         gridLayout_16->setObjectName("gridLayout_16");
         learnButton = new QPushButton(page);
@@ -207,28 +270,6 @@ public:
 
 
         gridLayout_12->addLayout(gridLayout_16, 1, 0, 1, 1);
-
-        gridLayout_15 = new QGridLayout();
-        gridLayout_15->setObjectName("gridLayout_15");
-        pushButton_10 = new QPushButton(page);
-        pushButton_10->setObjectName("pushButton_10");
-
-        gridLayout_15->addWidget(pushButton_10, 1, 0, 1, 1);
-
-        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
-
-        gridLayout_15->addItem(verticalSpacer_2, 2, 0, 1, 1);
-
-        typingInput = new TypingInput(page);
-        typingInput->setObjectName("typingInput");
-
-        gridLayout_15->addWidget(typingInput, 0, 0, 1, 1);
-
-        gridLayout_15->setRowStretch(0, 1);
-        gridLayout_15->setRowStretch(1, 1);
-        gridLayout_15->setRowStretch(2, 1);
-
-        gridLayout_12->addLayout(gridLayout_15, 4, 0, 1, 1);
 
 
         gridLayout_4->addLayout(gridLayout_12, 0, 1, 1, 1);
@@ -273,15 +314,15 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        pushButton_7->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
-        pushButton_8->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
-        pushButton_9->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
+        resetButton->setText(QString());
+        pushButton_2->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
+        pushButton->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
+        pushButton_3->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         nameLabel->setText(QCoreApplication::translate("MainWindow", "Bebeb", nullptr));
         infoButton->setText(QString());
         settingsButton->setText(QString());
         learnButton->setText(QCoreApplication::translate("MainWindow", "\320\236\320\261\321\203\321\207\320\265\320\275\320\270\320\265", nullptr));
         trainButton->setText(QCoreApplication::translate("MainWindow", "\320\242\321\200\320\265\320\275\320\270\321\200\320\276\320\262\320\272\320\260", nullptr));
-        pushButton_10->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
     } // retranslateUi
 
 };

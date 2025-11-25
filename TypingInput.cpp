@@ -186,8 +186,31 @@ void TypingInput::ensureCursorVisible()
 {
     if (m_currentPosition >= m_targetText.length()) return;
 
-    // Прокручиваем чтобы курсор был виден
-    QTextEdit::ensureCursorVisible();
+    // Получаем прямоугольник позиции курсора
+    QTextCursor cursor = textCursor();
+    cursor.setPosition(m_currentPosition);
+    QRect rect = cursorRect(cursor);
+
+    // Получаем видимую область
+    QRect visibleRect = viewport()->rect();
+
+    // Вычисляем высоту строки (примерную)
+    int lineHeight = rect.height();
+
+    // Вычисляем положение предпоследней строки (на одну строку выше низа)
+    int penultimateLineBottom = visibleRect.bottom() - lineHeight;
+
+    // Если курсор выходит за предпоследнюю строку, прокручиваем вниз
+    if (rect.bottom() > penultimateLineBottom) {
+        verticalScrollBar()->setValue(verticalScrollBar()->value() +
+                                      rect.bottom() - penultimateLineBottom);
+    }
+
+    // Если курсор выходит за верхнюю границу, прокручиваем вверх
+    if (rect.top() < visibleRect.top()) {
+        verticalScrollBar()->setValue(verticalScrollBar()->value() -
+                                      (visibleRect.top() - rect.top()));
+    }
 }
 
 void TypingInput::checkCharacter(int position, QChar enteredChar)
