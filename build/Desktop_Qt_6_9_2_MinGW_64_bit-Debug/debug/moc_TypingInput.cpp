@@ -44,6 +44,10 @@ template <> constexpr inline auto TypingInput::qt_create_metaobjectdata<qt_meta_
         "",
         "inputText",
         "inputCompleted",
+        "timerStarted",
+        "timerStopped",
+        "elapsedTime",
+        "timerUpdated",
         "cursorColor",
         "correctTextColor",
         "incorrectTextColor",
@@ -58,18 +62,28 @@ template <> constexpr inline auto TypingInput::qt_create_metaobjectdata<qt_meta_
         }}),
         // Signal 'inputCompleted'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'timerStarted'
+        QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'timerStopped'
+        QtMocHelpers::SignalData<void(qint64)>(6, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::LongLong, 7 },
+        }}),
+        // Signal 'timerUpdated'
+        QtMocHelpers::SignalData<void(qint64)>(8, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::LongLong, 7 },
+        }}),
     };
     QtMocHelpers::UintData qt_properties {
         // property 'cursorColor'
-        QtMocHelpers::PropertyData<QColor>(5, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
-        // property 'correctTextColor'
-        QtMocHelpers::PropertyData<QColor>(6, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
-        // property 'incorrectTextColor'
-        QtMocHelpers::PropertyData<QColor>(7, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
-        // property 'pendingTextColor'
-        QtMocHelpers::PropertyData<QColor>(8, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
-        // property 'backgroundColor'
         QtMocHelpers::PropertyData<QColor>(9, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
+        // property 'correctTextColor'
+        QtMocHelpers::PropertyData<QColor>(10, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
+        // property 'incorrectTextColor'
+        QtMocHelpers::PropertyData<QColor>(11, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
+        // property 'pendingTextColor'
+        QtMocHelpers::PropertyData<QColor>(12, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
+        // property 'backgroundColor'
+        QtMocHelpers::PropertyData<QColor>(13, QMetaType::QColor, QMC::DefaultPropertyFlags | QMC::Writable | QMC::StdCppSet),
     };
     QtMocHelpers::UintData qt_enums {
     };
@@ -93,6 +107,9 @@ void TypingInput::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         switch (_id) {
         case 0: _t->textChanged((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 1: _t->inputCompleted(); break;
+        case 2: _t->timerStarted(); break;
+        case 3: _t->timerStopped((*reinterpret_cast< std::add_pointer_t<qint64>>(_a[1]))); break;
+        case 4: _t->timerUpdated((*reinterpret_cast< std::add_pointer_t<qint64>>(_a[1]))); break;
         default: ;
         }
     }
@@ -100,6 +117,12 @@ void TypingInput::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         if (QtMocHelpers::indexOfMethod<void (TypingInput::*)(const QString & )>(_a, &TypingInput::textChanged, 0))
             return;
         if (QtMocHelpers::indexOfMethod<void (TypingInput::*)()>(_a, &TypingInput::inputCompleted, 1))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (TypingInput::*)()>(_a, &TypingInput::timerStarted, 2))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (TypingInput::*)(qint64 )>(_a, &TypingInput::timerStopped, 3))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (TypingInput::*)(qint64 )>(_a, &TypingInput::timerUpdated, 4))
             return;
     }
     if (_c == QMetaObject::ReadProperty) {
@@ -145,14 +168,14 @@ int TypingInput::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 5;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 2;
+        _id -= 5;
     }
     if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
             || _c == QMetaObject::ResetProperty || _c == QMetaObject::BindableProperty
@@ -173,5 +196,23 @@ void TypingInput::textChanged(const QString & _t1)
 void TypingInput::inputCompleted()
 {
     QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
+}
+
+// SIGNAL 2
+void TypingInput::timerStarted()
+{
+    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+}
+
+// SIGNAL 3
+void TypingInput::timerStopped(qint64 _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 3, nullptr, _t1);
+}
+
+// SIGNAL 4
+void TypingInput::timerUpdated(qint64 _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 4, nullptr, _t1);
 }
 QT_WARNING_POP

@@ -11,6 +11,8 @@ CONFIG += c++17
 SOURCES += \
     ControlButton.cpp \
     ScrollButtonWidget.cpp \
+    StatisticsManager.cpp \
+    StatisticsWidget.cpp \
     TypingInput.cpp \
     main.cpp \
     mainwindow.cpp
@@ -18,6 +20,8 @@ SOURCES += \
 HEADERS += \
     ControlButton.h \
     ScrollButtonWidget.h \
+    StatisticsManager.h \
+    StatisticsWidget.h \
     TypingInput.h \
     mainwindow.h
 

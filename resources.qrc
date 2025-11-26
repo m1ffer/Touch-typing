@@ -3,5 +3,6 @@
         <file>res/settingsButton.svg</file>
         <file>res/infoButton.svg</file>
         <file>res/resetButton.svg</file>
+        <file>res/closeButton.svg</file>
     </qresource>
 </RCC>

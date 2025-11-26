@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "../../../mainwindow.h"
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -41,7 +42,15 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "MainWindow",
         "onTrainModeClicked",
         "",
-        "onLearnModeClicked"
+        "onLearnModeClicked",
+        "switchToTrainingMode",
+        "switchToLearningMode",
+        "onTypingTimerStarted",
+        "onTypingTimerStopped",
+        "elapsedTime",
+        "onTypingTimerUpdated",
+        "onResetButtonClicked",
+        "onCloseChoseButtonClicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -49,6 +58,24 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onLearnModeClicked'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'switchToTrainingMode'
+        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'switchToLearningMode'
+        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onTypingTimerStarted'
+        QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onTypingTimerStopped'
+        QtMocHelpers::SlotData<void(qint64)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::LongLong, 8 },
+        }}),
+        // Slot 'onTypingTimerUpdated'
+        QtMocHelpers::SlotData<void(qint64)>(9, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::LongLong, 8 },
+        }}),
+        // Slot 'onResetButtonClicked'
+        QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onCloseChoseButtonClicked'
+        QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -74,10 +101,16 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->onTrainModeClicked(); break;
         case 1: _t->onLearnModeClicked(); break;
+        case 2: _t->switchToTrainingMode(); break;
+        case 3: _t->switchToLearningMode(); break;
+        case 4: _t->onTypingTimerStarted(); break;
+        case 5: _t->onTypingTimerStopped((*reinterpret_cast< std::add_pointer_t<qint64>>(_a[1]))); break;
+        case 6: _t->onTypingTimerUpdated((*reinterpret_cast< std::add_pointer_t<qint64>>(_a[1]))); break;
+        case 7: _t->onResetButtonClicked(); break;
+        case 8: _t->onCloseChoseButtonClicked(); break;
         default: ;
         }
     }
-    (void)_a;
 }
 
 const QMetaObject *MainWindow::metaObject() const
@@ -99,14 +132,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 9;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 9)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 2;
+        _id -= 9;
     }
     return _id;
 }

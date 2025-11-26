@@ -13,7 +13,9 @@ TypingInput::TypingInput(QWidget *parent)
     m_incorrectTextColor(QColor(255, 0, 0)),
     m_pendingTextColor(QColor(128, 128, 128)),
     m_backgroundColor(QColor(40, 40, 40)),
-    m_currentPosition(0)
+    m_currentPosition(0),
+    m_errorsCount(0),
+    m_totalCharsTyped(0)
 {
     // Настройка внешнего вида
     setFrameStyle(QFrame::NoFrame);
@@ -27,6 +29,14 @@ TypingInput::TypingInput(QWidget *parent)
 
     // Используем стандартный курсор, но делаем его желтым
     setCursorWidth(2);
+
+    // ДОБАВЛЕНО: Инициализация таймера обновления
+    m_updateTimer = new QTimer(this);
+    connect(m_updateTimer, &QTimer::timeout, this, [this]() {
+        if (m_timerActive) {
+            emit timerUpdated(m_typingTimer.elapsed());
+        }
+    });
 
     // Начальные настройки
     updateStyle();
@@ -45,6 +55,9 @@ void TypingInput::setTargetText(const QString &text)
     m_currentPosition = 0;
     clear();
 
+    // ДОБАВЛЕНО: Сбрасываем таймер при установке нового текста
+    stopTimer();
+
     // Устанавливаем серый цвет для всего целевого текста
     QTextCharFormat format;
     format.setForeground(m_pendingTextColor);
@@ -62,7 +75,11 @@ void TypingInput::reset()
 {
     m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
     m_currentPosition = 0;
+    // ДОБАВЛЕНО: Сбрасываем таймер
+    stopTimer();
     setTargetText(m_targetText);
+    m_errorsCount = 0; // ДОБАВЛЕНО
+    m_totalCharsTyped = 0; // ДОБАВЛЕНО
 }
 
 void TypingInput::keyPressEvent(QKeyEvent *event)
@@ -105,8 +122,18 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
 
     // Обрабатываем обычные символы - ДОБАВЛЕНО сохранение в m_enteredText
     if (!event->text().isEmpty() && m_currentPosition < m_targetText.length()) {
+        // ДОБАВЛЕНО: Запускаем таймер при первом нажатии
+        if (!m_timerActive && m_enteredText.isEmpty()) {
+            startTimer();
+        }
         QChar enteredChar = event->text().at(0);
         m_enteredText += enteredChar;  // ДОБАВЛЕНО: сохраняем введенный символ
+        m_totalCharsTyped++; // ДОБАВЛЕНО: Счетчик всех нажатий
+
+        // ДОБАВЛЕНО: Подсчет ошибок
+        if (enteredChar != m_targetText.at(m_currentPosition)) {
+            m_errorsCount++;
+        }
         checkCharacter(m_currentPosition, enteredChar);
         m_currentPosition++;
 
@@ -120,6 +147,8 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
 
         // Check if input is completed
         if (m_currentPosition >= m_targetText.length()) {
+            // ДОБАВЛЕНО: Останавливаем таймер при завершении
+            stopTimer();
             emit inputCompleted();
         }
     }
@@ -280,3 +309,60 @@ bool TypingInput::setTargetTextFromFile(const QString &filePath)
 
     return true;
 }
+
+// ДОБАВЛЕНО: Методы для работы с таймером
+void TypingInput::startTimer()
+{
+    if (!m_timerActive) {
+        m_typingTimer.start();
+        m_timerActive = true;
+        m_updateTimer->start(100); // Обновление каждые 100 мс
+        emit timerStarted();
+        qDebug() << "Таймер запущен";
+    }
+}
+
+void TypingInput::stopTimer()
+{
+    if (m_timerActive) {
+        m_timerActive = false;
+        m_updateTimer->stop();
+        qint64 elapsed = m_typingTimer.elapsed();
+        emit timerStopped(elapsed);
+        qDebug() << "Таймер остановлен, время:" << elapsed << "мс";
+    }
+}
+
+qint64 TypingInput::getElapsedTime() const
+{
+    return m_timerActive ? m_typingTimer.elapsed() : 0;
+}
+
+bool TypingInput::isTimerRunning() const
+{
+    return m_timerActive;
+}
+
+// ДОБАВЛЯЕМ МЕТОДЫ ДЛЯ СТАТИСТИКИ
+double TypingInput::getAccuracy() const
+{
+    if (m_totalCharsTyped == 0) return 100.0;
+    return ((m_totalCharsTyped - m_errorsCount) / (double)m_totalCharsTyped) * 100.0;
+}
+
+double TypingInput::getSpeedWpm() const
+{
+    if (m_typingTimer.elapsed() == 0) return 0.0;
+    // Стандартное слово = 5 символов
+    double words = m_totalCharsTyped / 5.0;
+    double minutes = m_typingTimer.elapsed() / 60000.0;
+    return words / minutes;
+}
+
+double TypingInput::getSpeedCpm() const
+{
+    if (m_typingTimer.elapsed() == 0) return 0.0;
+    double minutes = m_typingTimer.elapsed() / 60000.0;
+    return m_totalCharsTyped / minutes;
+}
+

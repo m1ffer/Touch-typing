@@ -26,6 +26,11 @@ public:
 
     void setTargetText(const QString &text);
     void reset();
+    // Методы для работы со временем
+    void startTimer();
+    void stopTimer();
+    qint64 getElapsedTime() const;
+    bool isTimerRunning() const;
 
     QColor cursorColor() const { return m_cursorColor; }
     void setCursorColor(const QColor &color);
@@ -42,9 +47,18 @@ public:
     QColor backgroundColor() const { return m_backgroundColor; }
     void setBackgroundColor(const QColor &color) { m_backgroundColor = color; updateStyle(); }
     bool setTargetTextFromFile(const QString &filePath);
+    // ДОБАВЛЕНО: Методы для статистики
+    int getErrorsCount() const { return m_errorsCount; }
+    int getTotalCharsTyped() const { return m_totalCharsTyped; }
+    double getAccuracy() const;
+    double getSpeedWpm() const; // Words Per Minute
+    double getSpeedCpm() const; // Characters Per Minute
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();
+    void timerStarted(); // ДОБАВЛЕНО
+    void timerStopped(qint64 elapsedTime); // ДОБАВЛЕНО
+    void timerUpdated(qint64 elapsedTime); // ДОБАВЛЕНО
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -66,6 +80,14 @@ private:
     QString m_targetText;
     QString m_enteredText;
     int m_currentPosition;
+
+    // ДОБАВЛЕНО: Переменные для отслеживания времени
+    QElapsedTimer m_typingTimer;
+    QTimer *m_updateTimer;
+    bool m_timerActive;
+    // ДОБАВЛЕНО: Статистика ошибок
+    int m_errorsCount;
+    int m_totalCharsTyped;
 };
 
 #endif // TYPINGINPUT_H
