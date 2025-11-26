@@ -22,59 +22,23 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Найден learnButton:" << (learnButton != nullptr);
 
     if (trainButton && learnButton) {
-        // Настраиваем кнопки как переключаемые
-        trainButton->setCheckable(true);
-        learnButton->setCheckable(true);
+        // УБИРАЕМ все что связано с checkable и группами
+        // trainButton->setCheckable(false); // или просто не устанавливаем
+        // learnButton->setCheckable(false);
 
-        qDebug() << "Кнопки сделаны checkable";
+        // Прямое подключение кликов к разным слотам
+        connect(trainButton, &QPushButton::clicked, this, &MainWindow::onTrainModeClicked);
+        connect(learnButton, &QPushButton::clicked, this, &MainWindow::onLearnModeClicked);
 
-        // Добавляем кнопки в группу с ID
-        modeButtonGroup->addButton(trainButton, 0);
-        modeButtonGroup->addButton(learnButton, 1);
+        qDebug() << "Обычные обработчики подключены";
 
-        qDebug() << "Кнопки добавлены в QButtonGroup";
-
-        // Включаем исключительный выбор
-        modeButtonGroup->setExclusive(true);
-
-        // Устанавливаем режим по умолчанию
-        trainButton->setChecked(true);
-        qDebug() << "trainButton установлен как активный по умолчанию";
-
-        // УНИВЕРСАЛЬНОЕ ПОДКЛЮЧЕНИЕ СИГНАЛА
-        // Используем лямбда-функцию для обхода проблем с сигнатурами
-        connect(modeButtonGroup, &QButtonGroup::idClicked,
-                this, &MainWindow::onModeChanged);
-        qDebug() << "Сигнал подключен через idClicked";
-
-        // ДУБЛИРУЮЩЕЕ ПОДКЛЮЧЕНИЕ для надежности
-        connect(trainButton, &QPushButton::toggled, this, [this](bool checked) {
-            if (checked) {
-                qDebug() << "trainButton toggled -> calling onModeChanged(0)";
-                this->onModeChanged(0);
-            }
-        });
-
-        connect(learnButton, &QPushButton::toggled, this, [this](bool checked) {
-            if (checked) {
-                qDebug() << "learnButton toggled -> calling onModeChanged(1)";
-                this->onModeChanged(1);
-            }
-        });
-
-        qDebug() << "Дублирующие сигналы подключены";
-
-        // Применяем стиль
+        // Если нужен общий стиль (но уже без активного/неактивного состояния)
         applyButtonStyle();
-        qDebug() << "Стиль применен";
-
-        qDebug() << "Текущий активный ID:" << modeButtonGroup->checkedId();
 
     } else {
         qDebug() << "ОШИБКА: Не все кнопки найдены!";
 
-        // Выведем все доступные QPushButton для диагностики
-        qDebug() << "=== Все QPushButton в интерфейсе: ===";
+        // Диагностика
         QList<QPushButton*> allButtons = findChildren<QPushButton*>();
         for (QPushButton *btn : allButtons) {
             qDebug() << "Button:" << btn->objectName() << "Text:" << btn->text();
@@ -163,35 +127,19 @@ void MainWindow::applyButtonStyle()
     qDebug() << "Стиль успешно применен";
 }
 
-void MainWindow::onModeChanged(int id)
+
+void MainWindow::onTrainModeClicked()
 {
-    qDebug() << "=== СЛОТ onModeChanged ВЫЗВАН ===";
-    qDebug() << "Получен ID:" << id;
-    qDebug() << "Текущий checkedId:" << modeButtonGroup->checkedId();
+    qDebug() << "Режим тренировки активирован";
+    // Логика для режима тренировки
 
-    // Блокировка повторного нажатия на активную кнопку
-    int currentId = modeButtonGroup->checkedId();
-    if (currentId == id) {
-        qDebug() << "Повторное нажатие на активную кнопку - игнорируем";
-        return;
-    }
+}
 
-    // Логика переключения режимов
-    switch (id) {
-    case 0:
-        qDebug() << ">>> Активирован режим: Обучение (trainButton)";
-        // Ваш код для режима обучения
-        break;
-    case 1:
-        qDebug() << ">>> Активирован режим: Свободный (learnButton)";
-        // Ваш код для свободного режима
-        break;
-    default:
-        qDebug() << ">>> Неизвестный режим ID:" << id;
-        break;
-    }
+void MainWindow::onLearnModeClicked()
+{
+    qDebug() << "Режим обучения активирован";
+    // Логика для режима обучения
 
-    qDebug() << "=== ЗАВЕРШЕНИЕ onModeChanged ===";
 }
 
 MainWindow::~MainWindow()

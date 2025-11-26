@@ -17,7 +17,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void onModeChanged(int id);  // Слот для обработки переключения режимов
+    void onTrainModeClicked();
+    void onLearnModeClicked();
 
 private:
     void applyButtonStyle();  // Добавляем объявление метода

@@ -41,7 +41,7 @@ public:
 
     QColor backgroundColor() const { return m_backgroundColor; }
     void setBackgroundColor(const QColor &color) { m_backgroundColor = color; updateStyle(); }
-
+    bool setTargetTextFromFile(const QString &filePath);
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();

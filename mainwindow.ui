@@ -69,12 +69,15 @@
             <item row="2" column="0">
              <layout class="QGridLayout" name="gridLayout_14">
               <item row="0" column="0">
-               <widget class="QStackedWidget" name="stackedWidget_2">
-                <widget class="QWidget" name="page_3">
+               <widget class="QStackedWidget" name="modesStackedWidget">
+                <property name="currentIndex">
+                 <number>1</number>
+                </property>
+                <widget class="QWidget" name="inputMode">
                  <layout class="QGridLayout" name="gridLayout_9">
                   <item row="0" column="0">
-                   <layout class="QGridLayout" name="gridLayout_7" rowstretch="1,10">
-                    <item row="1" column="0">
+                   <layout class="QGridLayout" name="gridLayout_7" rowstretch="1">
+                    <item row="0" column="0">
                      <layout class="QGridLayout" name="gridLayout_10" rowstretch="5,1,5">
                       <item row="1" column="0">
                        <layout class="QGridLayout" name="gridLayout_17" columnstretch="10,1,10">
@@ -135,36 +138,21 @@
                       </item>
                      </layout>
                     </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="choseMode">
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_15">
                     <item row="0" column="0">
-                     <layout class="QGridLayout" name="gridLayout_15">
-                      <item row="0" column="1">
-                       <widget class="QPushButton" name="pushButton_2">
-                        <property name="text">
-                         <string>PushButton</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="0">
-                       <widget class="QPushButton" name="pushButton">
-                        <property name="text">
-                         <string>PushButton</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="2">
-                       <widget class="QPushButton" name="pushButton_3">
-                        <property name="text">
-                         <string>PushButton</string>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
+                     <widget class="ScrollButtonWidget" name="widget" native="true"/>
                     </item>
                    </layout>
                   </item>
                  </layout>
                 </widget>
-                <widget class="QWidget" name="page_4"/>
                </widget>
               </item>
              </layout>
@@ -296,6 +284,12 @@
    <class>TypingInput</class>
    <extends>QTextEdit</extends>
    <header location="global">TypingInput.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScrollButtonWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ScrollButtonWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

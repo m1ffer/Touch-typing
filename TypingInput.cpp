@@ -2,6 +2,9 @@
 #include "typinginput.h"
 #include <QTextBlock>
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
+#include <QRegularExpression>
 
 TypingInput::TypingInput(QWidget *parent)
     : QTextEdit(parent),
@@ -247,4 +250,33 @@ void TypingInput::updateCursorPosition()
     QTextCursor cursor = textCursor();
     cursor.setPosition(m_currentPosition);
     setTextCursor(cursor);
+}
+
+bool TypingInput::setTargetTextFromFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QTextStream in(&file);
+    QString content = in.readAll();
+    file.close();
+
+    // Заменяем все специальные символы на пробелы
+    // Включая переводы строк, табуляции и другие непечатаемые символы
+    QRegularExpression specialChars("[\\t\\n\\r\\f\\v]");
+    content.replace(specialChars, " ");
+
+    // Убираем множественные пробелы, оставляя одинарные
+    QRegularExpression multipleSpaces("\\s+");
+    content.replace(multipleSpaces, " ");
+
+    // Убираем пробелы в начале и конце
+    content = content.trimmed();
+
+    // Устанавливаем обработанный текст как целевой
+    setTargetText(content);
+
+    return true;
 }

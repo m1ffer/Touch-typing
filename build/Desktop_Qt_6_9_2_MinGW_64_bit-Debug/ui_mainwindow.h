@@ -41,7 +41,7 @@ public:
     QSpacerItem *horizontalSpacer_2;
     QGridLayout *gridLayout_12;
     QGridLayout *gridLayout_14;
-    QStackedWidget *stackedWidget_2;
+    QStackedWidget *modesStackedWidget;
     QWidget *page_3;
     QGridLayout *gridLayout_9;
     QGridLayout *gridLayout_7;
@@ -52,10 +52,6 @@ public:
     QSpacerItem *horizontalSpacer_5;
     QSpacerItem *verticalSpacer;
     TypingInput *typingInput;
-    QGridLayout *gridLayout_15;
-    QPushButton *pushButton_2;
-    QPushButton *pushButton;
-    QPushButton *pushButton_3;
     QWidget *page_4;
     QGridLayout *gridLayout_13;
     QGridLayout *gridLayout_8;
@@ -116,8 +112,8 @@ public:
         gridLayout_12->setObjectName("gridLayout_12");
         gridLayout_14 = new QGridLayout();
         gridLayout_14->setObjectName("gridLayout_14");
-        stackedWidget_2 = new QStackedWidget(page);
-        stackedWidget_2->setObjectName("stackedWidget_2");
+        modesStackedWidget = new QStackedWidget(page);
+        modesStackedWidget->setObjectName("modesStackedWidget");
         page_3 = new QWidget();
         page_3->setObjectName("page_3");
         gridLayout_9 = new QGridLayout(page_3);
@@ -163,39 +159,18 @@ public:
         gridLayout_10->setRowStretch(1, 1);
         gridLayout_10->setRowStretch(2, 5);
 
-        gridLayout_7->addLayout(gridLayout_10, 1, 0, 1, 1);
-
-        gridLayout_15 = new QGridLayout();
-        gridLayout_15->setObjectName("gridLayout_15");
-        pushButton_2 = new QPushButton(page_3);
-        pushButton_2->setObjectName("pushButton_2");
-
-        gridLayout_15->addWidget(pushButton_2, 0, 1, 1, 1);
-
-        pushButton = new QPushButton(page_3);
-        pushButton->setObjectName("pushButton");
-
-        gridLayout_15->addWidget(pushButton, 0, 0, 1, 1);
-
-        pushButton_3 = new QPushButton(page_3);
-        pushButton_3->setObjectName("pushButton_3");
-
-        gridLayout_15->addWidget(pushButton_3, 0, 2, 1, 1);
-
-
-        gridLayout_7->addLayout(gridLayout_15, 0, 0, 1, 1);
+        gridLayout_7->addLayout(gridLayout_10, 0, 0, 1, 1);
 
         gridLayout_7->setRowStretch(0, 1);
-        gridLayout_7->setRowStretch(1, 10);
 
         gridLayout_9->addLayout(gridLayout_7, 0, 0, 1, 1);
 
-        stackedWidget_2->addWidget(page_3);
+        modesStackedWidget->addWidget(page_3);
         page_4 = new QWidget();
         page_4->setObjectName("page_4");
-        stackedWidget_2->addWidget(page_4);
+        modesStackedWidget->addWidget(page_4);
 
-        gridLayout_14->addWidget(stackedWidget_2, 0, 0, 1, 1);
+        gridLayout_14->addWidget(modesStackedWidget, 0, 0, 1, 1);
 
 
         gridLayout_12->addLayout(gridLayout_14, 2, 0, 1, 1);
@@ -315,9 +290,6 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
         resetButton->setText(QString());
-        pushButton_2->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
-        pushButton->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
-        pushButton_3->setText(QCoreApplication::translate("MainWindow", "PushButton", nullptr));
         nameLabel->setText(QCoreApplication::translate("MainWindow", "Bebeb", nullptr));
         infoButton->setText(QString());
         settingsButton->setText(QString());
