@@ -53,6 +53,10 @@ public:
     double getAccuracy() const;
     double getSpeedWpm() const; // Words Per Minute
     double getSpeedCpm() const; // Characters Per Minute
+    // ДОБАВИТЬ: Методы для получения данных графика
+    QVector<QPair<qint64, double>> getSpeedHistory() const { return m_speedHistory; }
+    QVector<QPair<qint64, double>> getAccuracyHistory() const { return m_accuracyHistory; }
+     //QVector<QPair<qint64, double>> getSpeedHistory() const;
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();
@@ -88,6 +92,11 @@ private:
     // ДОБАВЛЕНО: Статистика ошибок
     int m_errorsCount;
     int m_totalCharsTyped;
+    // ДОБАВИТЬ: История для графика
+    QVector<QPair<qint64, double>> m_speedHistory;    // время -> скорость
+    QVector<QPair<qint64, double>> m_accuracyHistory; // время -> точность
+    QTimer *m_historyTimer;  // Таймер для записи истории
+     qint64 m_finalTimeMs; // ДОБАВИТЬ: финальное время
 };
 
 #endif // TYPINGINPUT_H

@@ -1,10 +1,14 @@
 release/ControlButton.o
 release/ScrollButtonWidget.o
+release/StatisticsManager.o
+release/StatisticsWidget.o
 release/TypingInput.o
 release/main.o
 release/mainwindow.o
 release/qrc_resources.o
 release/moc_ControlButton.o
 release/moc_ScrollButtonWidget.o
+release/moc_StatisticsManager.o
+release/moc_StatisticsWidget.o
 release/moc_TypingInput.o
 release/moc_mainwindow.o

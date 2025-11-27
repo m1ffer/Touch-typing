@@ -1,0 +1,22 @@
+[
+    {
+        "accuracy": 56.25,
+        "errorsCount": 7,
+        "lessonId": 0,
+        "speedCpm": 123.69540007730963,
+        "speedWpm": 24.739080015461926,
+        "timeMs": 0,
+        "timestamp": "2025-11-27T13:00:34",
+        "totalChars": 16
+    },
+    {
+        "accuracy": 0,
+        "errorsCount": 15,
+        "lessonId": 0,
+        "speedCpm": 943.3962264150942,
+        "speedWpm": 188.67924528301884,
+        "timeMs": 0,
+        "timestamp": "2025-11-27T13:01:21",
+        "totalChars": 15
+    }
+]

@@ -2,52 +2,34 @@
 #define STATISTICSWIDGET_H
 
 #include <QWidget>
-#include <QtCharts>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QFormLayout>
+#include <QGroupBox>
 #include <QChartView>
 #include <QLineSeries>
-#include <QBarSeries>
-#include <QBarSet>
 #include <QValueAxis>
-#include <QDateTimeAxis>
-#include <QGridLayout>
-#include <QLabel>
-#include <QTabWidget>
-#include "StatisticsManager.h"
 
-QT_CHARTS_USE_NAMESPACE
-
-    class StatisticsWidget : public QWidget
+class StatisticsWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit StatisticsWidget(StatisticsManager *statsManager, QWidget *parent = nullptr);
+    explicit StatisticsWidget(double accuracy, double speedCpm,
+                              qint64 timeMs, int errorsCount, int totalChars,
+                              const QVector<QPair<qint64, double>>& speedHistory,  // Добавили историю
+                              QWidget *parent = nullptr);
 
 private slots:
-    void updateCharts();
-    void updateSummary();
+    void closeWindow();
 
 private:
-    void createSpeedChart();
-    void createAccuracyChart();
-    void createProgressChart();
-    void createSummaryPanel();
+    void createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory);
 
-    StatisticsManager *m_statsManager;
-    QTabWidget *m_tabWidget;
-
-    // Графики
-    QChartView *m_speedChartView;
-    QChartView *m_accuracyChartView;
-    QChartView *m_progressChartView;
-
-    // Панель сводки
-    QWidget *m_summaryWidget;
-    QLabel *m_totalSessionsLabel;
-    QLabel *m_totalTimeLabel;
-    QLabel *m_avgSpeedLabel;
-    QLabel *m_avgAccuracyLabel;
-    QLabel *m_bestSpeedLabel;
+    QPushButton *m_closeButton;
+    QChartView *m_chartView;  // Для отображения графика
 };
 
 #endif // STATISTICSWIDGET_H

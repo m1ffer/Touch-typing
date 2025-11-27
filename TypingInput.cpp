@@ -15,7 +15,9 @@ TypingInput::TypingInput(QWidget *parent)
     m_backgroundColor(QColor(40, 40, 40)),
     m_currentPosition(0),
     m_errorsCount(0),
-    m_totalCharsTyped(0)
+    m_totalCharsTyped(0),
+    m_timerActive(false),
+    m_finalTimeMs(0) // ДОБАВИТЬ
 {
     // Настройка внешнего вида
     setFrameStyle(QFrame::NoFrame);
@@ -35,6 +37,19 @@ TypingInput::TypingInput(QWidget *parent)
     connect(m_updateTimer, &QTimer::timeout, this, [this]() {
         if (m_timerActive) {
             emit timerUpdated(m_typingTimer.elapsed());
+        }
+    });
+
+    // ДОБАВИТЬ: Таймер для записи истории (каждую секунду)
+    m_historyTimer = new QTimer(this);
+    connect(m_historyTimer, &QTimer::timeout, this, [this]() {
+        if (m_timerActive && m_totalCharsTyped > 0) {
+            qint64 currentTime = m_typingTimer.elapsed();
+            double currentSpeed = getSpeedCpm();
+
+            m_speedHistory.append(qMakePair(currentTime, currentSpeed));
+
+            qDebug() << "Записана точка графика:" << currentTime << "мс," << currentSpeed << "CPM";
         }
     });
 
@@ -80,6 +95,9 @@ void TypingInput::reset()
     setTargetText(m_targetText);
     m_errorsCount = 0; // ДОБАВЛЕНО
     m_totalCharsTyped = 0; // ДОБАВЛЕНО
+    m_speedHistory.clear();     // ДОБАВИТЬ
+    m_accuracyHistory.clear();  // ДОБАВИТЬ
+    m_finalTimeMs = 0; // СБРАСЫВАЕМ время
 }
 
 void TypingInput::keyPressEvent(QKeyEvent *event)
@@ -317,6 +335,7 @@ void TypingInput::startTimer()
         m_typingTimer.start();
         m_timerActive = true;
         m_updateTimer->start(100); // Обновление каждые 100 мс
+        m_historyTimer->start(100); // Записывать каждую секунду
         emit timerStarted();
         qDebug() << "Таймер запущен";
     }
@@ -326,16 +345,20 @@ void TypingInput::stopTimer()
 {
     if (m_timerActive) {
         m_timerActive = false;
+        m_finalTimeMs = m_typingTimer.elapsed(); // СОХРАНЯЕМ время
         m_updateTimer->stop();
+        m_historyTimer->stop();  // ДОБАВИТЬ
         qint64 elapsed = m_typingTimer.elapsed();
         emit timerStopped(elapsed);
         qDebug() << "Таймер остановлен, время:" << elapsed << "мс";
+        qDebug() << "Активен ли таймер:" << m_timerActive;
+        qDebug() << "Таймер действительно измеряет:" << m_typingTimer.isValid();
     }
 }
 
 qint64 TypingInput::getElapsedTime() const
 {
-    return m_timerActive ? m_typingTimer.elapsed() : 0;
+    return m_timerActive ? m_typingTimer.elapsed() : m_finalTimeMs;
 }
 
 bool TypingInput::isTimerRunning() const
@@ -365,4 +388,10 @@ double TypingInput::getSpeedCpm() const
     double minutes = m_typingTimer.elapsed() / 60000.0;
     return m_totalCharsTyped / minutes;
 }
+
+// Добавим метод для получения истории скорости:
+/*QVector<QPair<qint64, double>> TypingInput::getSpeedHistory() const
+{
+    return m_speedHistory;
+}*/
 

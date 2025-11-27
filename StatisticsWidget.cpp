@@ -1,196 +1,145 @@
 #include "StatisticsWidget.h"
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QFormLayout>
-#include <QGroupBox>
+#include <QDebug>
+#include <QApplication>
+#include <QScreen>
 
-StatisticsWidget::StatisticsWidget(StatisticsManager *statsManager, QWidget *parent)
+StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
+                                   qint64 timeMs, int errorsCount, int totalChars,
+                                   const QVector<QPair<qint64, double>>& speedHistory,
+                                   QWidget *parent)
     : QWidget(parent)
-    , m_statsManager(statsManager)
 {
-    setWindowTitle("Статистика печати");
-    setMinimumSize(800, 600);
+    setWindowTitle("Результаты тренировки");
+    setMinimumSize(500, 600);  // Увеличили высоту для графика
+
+    // Устанавливаем модальность и убираем кнопки управления
+    setWindowModality(Qt::ApplicationModal);
+    setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
     // Основной layout
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // Создаем вкладки
-    m_tabWidget = new QTabWidget(this);
-
-    // Вкладка с графиками
-    QWidget *chartsTab = new QWidget();
-    QVBoxLayout *chartsLayout = new QVBoxLayout(chartsTab);
-
-    // Создаем графики
-    createSpeedChart();
-    createAccuracyChart();
-    createProgressChart();
-
-    chartsLayout->addWidget(m_speedChartView);
-    chartsLayout->addWidget(m_accuracyChartView);
-    chartsLayout->addWidget(m_progressChartView);
-
-    // Вкладка со сводкой
-    createSummaryPanel();
-
-    m_tabWidget->addTab(chartsTab, "Графики");
-    m_tabWidget->addTab(m_summaryWidget, "Сводка");
-
-    mainLayout->addWidget(m_tabWidget);
-
-    // Обновляем данные
-    updateCharts();
-    updateSummary();
-}
-
-void StatisticsWidget::createSpeedChart()
-{
-    QLineSeries *series = new QLineSeries();
-    series->setName("Скорость (слов/мин)");
-
-    auto records = m_statsManager->getRecords();
-    for (int i = 0; i < records.size(); ++i) {
-        series->append(i, records[i].speedWpm);
+    // ДОБАВЛЕНО: Создаем график если есть данные
+    if (!speedHistory.isEmpty()) {
+        createSpeedChart(speedHistory);
+        mainLayout->addWidget(m_chartView);
     }
 
+    // Группа с статистикой
+    QGroupBox *statsGroup = new QGroupBox("Статистика тренировки");
+    QFormLayout *formLayout = new QFormLayout(statsGroup);
+
+    // Исправляем отображение времени
+    int totalSeconds = timeMs / 1000;
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+    QString timeString;
+
+    if (minutes > 0) {
+        timeString = QString("%1 мин %2 сек").arg(minutes).arg(seconds);
+    } else {
+        timeString = QString("%1 сек").arg(seconds);
+    }
+
+    // Создаем метки для статистики
+    QLabel *timeLabel = new QLabel(timeString);
+    QLabel *accuracyLabel = new QLabel(QString("%1%").arg(accuracy, 0, 'f', 1));
+    QLabel *speedCpmLabel = new QLabel(QString("%1 симв/мин").arg(speedCpm, 0, 'f', 1));
+    QLabel *errorsLabel = new QLabel(QString::number(errorsCount));
+    QLabel *charsTypedLabel = new QLabel(QString::number(totalChars));
+
+    // Делаем основные показатели более заметными
+    QFont boldFont = speedCpmLabel->font();
+    boldFont.setPointSize(12);
+    boldFont.setBold(true);
+    speedCpmLabel->setFont(boldFont);
+    accuracyLabel->setFont(boldFont);
+
+    formLayout->addRow("Время:", timeLabel);
+    formLayout->addRow("Точность:", accuracyLabel);
+    formLayout->addRow("Скорость:", speedCpmLabel);
+    formLayout->addRow("Ошибки:", errorsLabel);
+    formLayout->addRow("Символов введено:", charsTypedLabel);
+
+    // Кнопка закрытия
+    m_closeButton = new QPushButton("Закрыть", this);
+    connect(m_closeButton, &QPushButton::clicked, this, &StatisticsWidget::closeWindow);
+
+    // Добавляем все в основной layout
+    mainLayout->addWidget(statsGroup);
+    mainLayout->addWidget(m_closeButton, 0, Qt::AlignRight);
+
+    // Центрируем окно относительно родителя
+    if (parent) {
+        QRect parentRect = parent->geometry();
+        QPoint center = parentRect.center();
+        move(center - rect().center());
+    }
+
+    qDebug() << "=== СТАТИСТИКА ===";
+    qDebug() << "Время:" << timeMs << "мс (" << timeString << ")";
+    qDebug() << "Точность:" << accuracy << "%";
+    qDebug() << "Скорость CPM:" << speedCpm;
+    qDebug() << "Ошибки:" << errorsCount;
+    qDebug() << "Символов:" << totalChars;
+    qDebug() << "Точек на графике:" << speedHistory.size();
+}
+
+// ДОБАВЛЕНО: Метод создания графика скорости
+void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory)
+{
+    // Создаем серию данных для графика
+    QLineSeries *series = new QLineSeries();
+    series->setName("Скорость (симв/мин)");
+
+    // Добавляем точки данных (время в секундах, скорость в CPM)
+    for (const auto& point : speedHistory) {
+        double timeInSeconds = point.first / 1000.0;  // конвертируем мс в секунды
+        series->append(timeInSeconds, point.second);
+    }
+
+    // Создаем график
     QChart *chart = new QChart();
     chart->addSeries(series);
-    chart->setTitle("Прогресс скорости печати");
+    chart->setTitle("Динамика скорости во время тренировки");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
+    // Настраиваем ось X (время в секундах)
     QValueAxis *axisX = new QValueAxis();
-    axisX->setTitleText("Сессии");
-    axisX->setLabelFormat("%d");
+    axisX->setTitleText("Время (секунды)");
+    axisX->setLabelFormat("%.1f");
+    axisX->setMin(0);
+    if (!speedHistory.isEmpty()) {
+        double maxTime = speedHistory.last().first / 1000.0;
+        axisX->setMax(maxTime);
+    }
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
+    // Настраиваем ось Y (скорость в CPM)
     QValueAxis *axisY = new QValueAxis();
-    axisY->setTitleText("Слов в минуту");
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
+    axisY->setTitleText("Скорость (симв/мин)");
+    axisY->setMin(0);
 
-    m_speedChartView = new QChartView(chart);
-    m_speedChartView->setRenderHint(QPainter::Antialiasing);
-}
-
-void StatisticsWidget::createAccuracyChart()
-{
-    QLineSeries *series = new QLineSeries();
-    series->setName("Точность (%)");
-
-    auto records = m_statsManager->getRecords();
-    for (int i = 0; i < records.size(); ++i) {
-        series->append(i, records[i].accuracy);
-    }
-
-    QChart *chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Прогресс точности печати");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    QValueAxis *axisX = new QValueAxis();
-    axisX->setTitleText("Сессии");
-    axisX->setLabelFormat("%d");
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-
-    QValueAxis *axisY = new QValueAxis();
-    axisY->setTitleText("Точность (%)");
-    axisY->setRange(0, 100);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    m_accuracyChartView = new QChartView(chart);
-    m_accuracyChartView->setRenderHint(QPainter::Antialiasing);
-}
-
-void StatisticsWidget::createProgressChart()
-{
-    QBarSet *speedSet = new QBarSet("Скорость");
-    QBarSet *accuracySet = new QBarSet("Точность");
-
-    // Группируем по дням
-    QMap<QDate, QList<StatisticsRecord>> dailyRecords;
-    auto records = m_statsManager->getRecords();
-    for (const auto &record : records) {
-        QDate date = record.timestamp.date();
-        dailyRecords[date].append(record);
-    }
-
-    // Вычисляем средние значения по дням
-    QVector<QDate> dates = dailyRecords.keys().toVector();
-    std::sort(dates.begin(), dates.end());
-
-    for (const QDate &date : dates) {
-        double avgSpeed = 0.0;
-        double avgAccuracy = 0.0;
-        const auto &dayRecords = dailyRecords[date];
-
-        for (const auto &record : dayRecords) {
-            avgSpeed += record.speedWpm;
-            avgAccuracy += record.accuracy;
+    // Находим максимальную скорость для установки верхней границы
+    double maxSpeed = 0;
+    for (const auto& point : speedHistory) {
+        if (point.second > maxSpeed) {
+            maxSpeed = point.second;
         }
-
-        avgSpeed /= dayRecords.size();
-        avgAccuracy /= dayRecords.size();
-
-        *speedSet << avgSpeed;
-        *accuracySet << avgAccuracy;
     }
+    axisY->setMax(qMax(maxSpeed * 1.1, 100.0)); // Добавляем 10% запаса
 
-    QBarSeries *series = new QBarSeries();
-    series->append(speedSet);
-    series->append(accuracySet);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
 
-    QChart *chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Ежедневная статистика");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    m_progressChartView = new QChartView(chart);
-    m_progressChartView->setRenderHint(QPainter::Antialiasing);
+    // Создаем view для графика
+    m_chartView = new QChartView(chart);
+    m_chartView->setRenderHint(QPainter::Antialiasing);
+    m_chartView->setMinimumHeight(250);
 }
 
-void StatisticsWidget::createSummaryPanel()
+void StatisticsWidget::closeWindow()
 {
-    m_summaryWidget = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(m_summaryWidget);
-
-    QGroupBox *summaryGroup = new QGroupBox("Общая статистика");
-    QFormLayout *formLayout = new QFormLayout(summaryGroup);
-
-    m_totalSessionsLabel = new QLabel("0");
-    m_totalTimeLabel = new QLabel("0 мин");
-    m_avgSpeedLabel = new QLabel("0 слов/мин");
-    m_avgAccuracyLabel = new QLabel("0%");
-    m_bestSpeedLabel = new QLabel("0 слов/мин");
-
-    formLayout->addRow("Всего сессий:", m_totalSessionsLabel);
-    formLayout->addRow("Общее время:", m_totalTimeLabel);
-    formLayout->addRow("Средняя скорость:", m_avgSpeedLabel);
-    formLayout->addRow("Средняя точность:", m_avgAccuracyLabel);
-    formLayout->addRow("Лучшая скорость:", m_bestSpeedLabel);
-
-    layout->addWidget(summaryGroup);
-    layout->addStretch();
-}
-
-void StatisticsWidget::updateCharts()
-{
-    // Обновляем все графики
-    createSpeedChart();
-    createAccuracyChart();
-    createProgressChart();
-}
-
-void StatisticsWidget::updateSummary()
-{
-    auto records = m_statsManager->getRecords();
-    StatisticsRecord best = m_statsManager->getBestRecord();
-
-    m_totalSessionsLabel->setText(QString::number(records.size()));
-    m_totalTimeLabel->setText(QString::number(m_statsManager->getTotalPracticeTime()) + " мин");
-    m_avgSpeedLabel->setText(QString::number(m_statsManager->getAverageSpeed(), 'f', 1) + " слов/мин");
-    m_avgAccuracyLabel->setText(QString::number(m_statsManager->getAverageAccuracy(), 'f', 1) + "%");
-    m_bestSpeedLabel->setText(QString::number(best.speedWpm, 'f', 1) + " слов/мин");
+    this->close();
 }

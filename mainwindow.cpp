@@ -5,12 +5,13 @@
 #include <QDebug>
 #include <QList>
 #include <QLabel> // ДОБАВЛЕНО
+#include "StatisticsWidget.h"  // ДОБАВИТЬ
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , modeButtonGroup(new QButtonGroup(this))
-    , m_currentLessonId(0) // ДОБАВЛЕНО
+    , m_currentLessonId(0)
 {
     ui->setupUi(this);
 
@@ -20,68 +21,39 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");
     QPushButton *learnButton = findChild<QPushButton*>("learnButton");
 
-    qDebug() << "Найден trainButton:" << (trainButton != nullptr);
-    qDebug() << "Найден learnButton:" << (learnButton != nullptr);
-
     if (trainButton && learnButton) {
-        // УБИРАЕМ все что связано с checkable и группами
-        // trainButton->setCheckable(false); // или просто не устанавливаем
-        // learnButton->setCheckable(false);
-
-        // Прямое подключение кликов к разным слотам
         connect(trainButton, &QPushButton::clicked, this, &MainWindow::onTrainModeClicked);
         connect(learnButton, &QPushButton::clicked, this, &MainWindow::onLearnModeClicked);
-        connect(ui -> resetButton, &QPushButton :: clicked, this, &MainWindow :: onResetButtonClicked);
-        connect(ui -> closeChoseButton, &QPushButton :: clicked, this, &MainWindow :: onCloseChoseButtonClicked);
-        qDebug() << "Обычные обработчики подключены";
+        connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
+        connect(ui->closeChoseButton, &QPushButton::clicked, this, &MainWindow::onCloseChoseButtonClicked);
 
-        // Если нужен общий стиль (но уже без активного/неактивного состояния)
+        // ДОБАВИТЬ подключение сигнала завершения ввода
+        connect(ui->typingInput, &TypingInput::inputCompleted, this, &MainWindow::showTypingResults);
+
         applyButtonStyle();
-
     } else {
         qDebug() << "ОШИБКА: Не все кнопки найдены!";
-
-        // Диагностика
-        QList<QPushButton*> allButtons = findChildren<QPushButton*>();
-        for (QPushButton *btn : allButtons) {
-            qDebug() << "Button:" << btn->objectName() << "Text:" << btn->text();
-        }
     }
+
     setStyleSheet("background-color: #1a1a1a; color: #e6e6e6;");
 
     // Прямой доступ к TypingInput через UI
-    TypingInput *input = ui -> typingInput;
-    input->setTargetText("Этопримертекстадлятренировкислепойпечати...Этопримертекстадлятренировкислепойпечати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати... Это пример текста для тренировки слепой печати...");
+    TypingInput *input = ui->typingInput;
+    input->setTargetText("Этопримертекстадлятренировкислепойпечати...");
 
-    // ДОБАВЛЕНО: Подключаем сигналы таймера
+    // Подключаем сигналы таймера
     connect(input, &TypingInput::timerStarted, this, &MainWindow::onTypingTimerStarted);
     connect(input, &TypingInput::timerStopped, this, &MainWindow::onTypingTimerStopped);
     connect(input, &TypingInput::timerUpdated, this, &MainWindow::onTypingTimerUpdated);
 
-    connect(input, &TypingInput::textChanged, [](const QString &text) {
-        qDebug() << "Введенный текст:" << text;
-    });
-
-    connect(input, &TypingInput::inputCompleted, []() {
-        qDebug() << "Ввод завершен!";
-    });
-
-    connect(input, &TypingInput::textChanged, [](const QString &text) {
-        qDebug() << "Введенный текст:" << text;
-    });
-
-    connect(input, &TypingInput::inputCompleted, []() {
-        qDebug() << "Ввод завершен!";
-    });
-    // ДОБАВЛЕНО: Сбрасываем отображение таймера
+    // Сбрасываем отображение таймера
     resetTimerDisplay();
 
-    // Устанавливаем начальную страницу (тренировка по умолчанию)
+    // Устанавливаем начальную страницу
     initializeLessons();
     switchToTrainingMode();
 
     qDebug() << "=== Завершение инициализации MainWindow ===";
-
 }
 
 void MainWindow::applyButtonStyle()
@@ -201,7 +173,12 @@ void MainWindow::initializeLessons()
             "Урок 4: Цифры",
             "Урок 5: Символы",
             "Урок 6: Тренировка скорости",
-            "Урок 7: Тренировка точности"
+            "Урок 7: Тренировка точности",
+            ",t,t,t",
+            "djsf",
+            "sfe",
+            "es",
+            "efsef"
         };
 
         lessonWidget->addButtons(lessons);
@@ -229,7 +206,7 @@ void MainWindow::onTypingTimerStopped(qint64 elapsedTime)
     qDebug() << "Таймер остановлен. Затраченное время:" << elapsedTime << "мс";
 
     // Сохраняем статистику
-    saveStatistics(elapsedTime, m_currentLessonId);
+    //saveStatistics(elapsedTime, m_currentLessonId);
 
     // Обновляем отображение финального времени
     updateTimerDisplay(elapsedTime);
@@ -279,7 +256,7 @@ void MainWindow::resetTimerDisplay()
 }
 
 // ДОБАВЛЕНО: Метод для сохранения статистики
-void MainWindow::saveStatistics(qint64 timeMs, int lessonId)
+    /*void MainWindow::saveStatistics(qint64 timeMs, int lessonId)
 {
     // Сохраняем время для текущего урока
     m_typingTimes.append(timeMs);
@@ -299,7 +276,7 @@ void MainWindow::saveStatistics(qint64 timeMs, int lessonId)
 
     // Здесь можно добавить сохранение в файл или базу данных
     // saveToFile(lessonId, timeMs, averageTime);
-}
+}*/
 
 // Модифицируем метод выбора урока
 void MainWindow::onLessonSelected(const QString &text, const QVariant &data)
@@ -324,6 +301,92 @@ void MainWindow::onLessonSelected(const QString &text, const QVariant &data)
 void MainWindow::onCloseChoseButtonClicked(){
     switchToTrainingMode();
     onResetButtonClicked();
+}
+
+// ДОБАВИТЬ метод для расчета и показа статистики
+/*void MainWindow::calculateAndShowStatistics()
+{
+    TypingInput *input = ui->typingInput;
+
+    // Создаем запись статистики
+    StatisticsRecord record;
+    record.timestamp = QDateTime::currentDateTime();
+    record.lessonId = m_currentLessonId;
+    record.timeMs = input->getElapsedTime();
+    record.totalChars = input->getTotalCharsTyped();
+    record.errorsCount = input->getErrorsCount();
+    record.accuracy = input->getAccuracy();
+    record.speedWpm = input->getSpeedWpm();
+    record.speedCpm = input->getSpeedCpm();
+
+    // Добавляем запись в менеджер
+    m_statsManager->addRecord(record);
+
+    // Создаем и показываем виджет статистики
+    StatisticsWidget *statsWidget = new StatisticsWidget(m_statsManager, this);
+    statsWidget->setWindowModality(Qt::ApplicationModal);
+    statsWidget->setAttribute(Qt::WA_DeleteOnClose);
+    statsWidget->resize(900, 700);
+    statsWidget->show();
+
+    qDebug() << "=== СТАТИСТИКА ===";
+    qDebug() << "Урок:" << record.lessonId;
+    qDebug() << "Время:" << record.timeMs << "мс";
+    qDebug() << "Символов:" << record.totalChars;
+    qDebug() << "Ошибки:" << record.errorsCount;
+    qDebug() << "Точность:" << record.accuracy << "%";
+    qDebug() << "Скорость:" << record.speedWpm << "слов/мин";
+    qDebug() << "Скорость:" << record.speedCpm << "символов/мин";
+}*/
+
+// ДОБАВИТЬ метод для показа статистики
+void MainWindow::showTypingResults()
+{
+    qDebug() << "Показ результатов набора...";
+
+    TypingInput *input = ui->typingInput;
+
+    // Получаем статистику из TypingInput
+    double accuracy = input->getAccuracy();
+    double speedWpm = input->getSpeedWpm();
+    double speedCpm = input->getSpeedCpm();
+    qint64 timeMs = input->getElapsedTime();
+    int errorsCount = input->getErrorsCount();
+    int totalChars = input->getTotalCharsTyped();
+    QVector<QPair<qint64, double>> speedHistory = input->getSpeedHistory();
+    // ДОБАВИМ ОТЛАДКУ
+    qDebug() << "=== ОТЛАДКА СТАТИСТИКИ ===";
+    qDebug() << "timeMs:" << timeMs;
+    qDebug() << "accuracy:" << accuracy;
+    qDebug() << "speedWpm:" << speedWpm;
+    qDebug() << "speedCpm:" << speedCpm;
+    qDebug() << "errorsCount:" << errorsCount;
+    qDebug() << "totalChars:" << totalChars;
+     qDebug() << "Размер истории скорости:" << speedHistory.size();
+
+
+    // Если время равно 0, используем минимальное значение
+    if (timeMs == 0) {
+        timeMs = 1; // Минимальное значение чтобы избежать деления на 0
+        qDebug() << "Время было 0, установлено в 1 мс";
+    }
+
+    // Создаем и показываем виджет статистики с графиком
+    StatisticsWidget *statsWidget = new StatisticsWidget(accuracy, speedCpm,
+                                                         timeMs, errorsCount, totalChars,
+                                                         speedHistory,  // Передаем историю
+                                                         this);
+
+    // ДОБАВЛЕНО: Блокируем основное окно и центрируем
+    statsWidget->setWindowModality(Qt::ApplicationModal);
+    statsWidget->setAttribute(Qt::WA_DeleteOnClose);
+
+    statsWidget->setWindowModality(Qt::ApplicationModal);
+    statsWidget->setAttribute(Qt::WA_DeleteOnClose);
+    // Убираем кнопки управления окном
+    statsWidget->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    statsWidget->show();
+    qDebug() << "Окно статистики показано";
 }
 
 MainWindow::~MainWindow()

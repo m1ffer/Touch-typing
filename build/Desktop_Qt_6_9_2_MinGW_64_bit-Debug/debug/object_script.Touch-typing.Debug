@@ -1,10 +1,14 @@
 debug/ControlButton.o
 debug/ScrollButtonWidget.o
+debug/StatisticsManager.o
+debug/StatisticsWidget.o
 debug/TypingInput.o
 debug/main.o
 debug/mainwindow.o
 debug/qrc_resources.o
 debug/moc_ControlButton.o
 debug/moc_ScrollButtonWidget.o
+debug/moc_StatisticsManager.o
+debug/moc_StatisticsWidget.o
 debug/moc_TypingInput.o
 debug/moc_mainwindow.o
