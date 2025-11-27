@@ -40,13 +40,22 @@ template <> constexpr inline auto StatisticsWidget::qt_create_metaobjectdata<qt_
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "StatisticsWidget",
-        "closeWindow",
-        ""
+        "repeatRequested",
+        "",
+        "nextRequested",
+        "onRepeatClicked",
+        "onNextClicked"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'closeWindow'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Signal 'repeatRequested'
+        QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'nextRequested'
+        QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onRepeatClicked'
+        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onNextClicked'
+        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -70,11 +79,19 @@ void StatisticsWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     auto *_t = static_cast<StatisticsWidget *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->closeWindow(); break;
+        case 0: _t->repeatRequested(); break;
+        case 1: _t->nextRequested(); break;
+        case 2: _t->onRepeatClicked(); break;
+        case 3: _t->onNextClicked(); break;
         default: ;
         }
     }
-    (void)_a;
+    if (_c == QMetaObject::IndexOfMethod) {
+        if (QtMocHelpers::indexOfMethod<void (StatisticsWidget::*)()>(_a, &StatisticsWidget::repeatRequested, 0))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (StatisticsWidget::*)()>(_a, &StatisticsWidget::nextRequested, 1))
+            return;
+    }
 }
 
 const QMetaObject *StatisticsWidget::metaObject() const
@@ -96,15 +113,27 @@ int StatisticsWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 4;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 4)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 1;
+        _id -= 4;
     }
     return _id;
+}
+
+// SIGNAL 0
+void StatisticsWidget::repeatRequested()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+}
+
+// SIGNAL 1
+void StatisticsWidget::nextRequested()
+{
+    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 QT_WARNING_POP

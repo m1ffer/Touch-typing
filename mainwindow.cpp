@@ -376,6 +376,9 @@ void MainWindow::showTypingResults()
                                                          timeMs, errorsCount, totalChars,
                                                          speedHistory,  // Передаем историю
                                                          this);
+    // ДОБАВЛЕНО: Подключаем сигналы от виджета статистики
+    connect(statsWidget, &StatisticsWidget::repeatRequested, this, &MainWindow::onStatsRepeatRequested);
+    connect(statsWidget, &StatisticsWidget::nextRequested, this, &MainWindow::onStatsNextRequested);
 
     // ДОБАВЛЕНО: Блокируем основное окно и центрируем
     statsWidget->setWindowModality(Qt::ApplicationModal);
@@ -387,6 +390,21 @@ void MainWindow::showTypingResults()
     statsWidget->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     statsWidget->show();
     qDebug() << "Окно статистики показано";
+}
+
+// ДОБАВЛЕНО: Слот для кнопки "Повторить"
+void MainWindow::onStatsRepeatRequested()
+{
+    qDebug() << "Обработка кнопки 'Повторить'";
+    onResetButtonClicked();  // Вызываем сброс как при нажатии кнопки Reset
+}
+
+// ДОБАВЛЕНО: Слот для кнопки "Дальше" (пока пустой)
+void MainWindow::onStatsNextRequested()
+{
+    qDebug() << "Обработка кнопки 'Дальше'";
+    // Можно добавить логику перехода к следующему уроку
+    // или другой функционал в будущем
 }
 
 MainWindow::~MainWindow()

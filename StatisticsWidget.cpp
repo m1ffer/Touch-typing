@@ -10,7 +10,7 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     : QWidget(parent)
 {
     setWindowTitle("Результаты тренировки");
-    setMinimumSize(500, 600);  // Увеличили высоту для графика
+    setMinimumSize(500, 600);
 
     // Устанавливаем модальность и убираем кнопки управления
     setWindowModality(Qt::ApplicationModal);
@@ -19,7 +19,7 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     // Основной layout
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // ДОБАВЛЕНО: Создаем график если есть данные
+    // Создаем график если есть данные
     if (!speedHistory.isEmpty()) {
         createSpeedChart(speedHistory);
         mainLayout->addWidget(m_chartView);
@@ -61,13 +61,22 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     formLayout->addRow("Ошибки:", errorsLabel);
     formLayout->addRow("Символов введено:", charsTypedLabel);
 
-    // Кнопка закрытия
-    m_closeButton = new QPushButton("Закрыть", this);
-    connect(m_closeButton, &QPushButton::clicked, this, &StatisticsWidget::closeWindow);
+    // Создаем кнопки "Повторить" и "Дальше"
+    m_repeatButton = new QPushButton("Повторить", this);
+    m_nextButton = new QPushButton("Дальше", this);
+
+    // Подключаем кнопки к слотам
+    connect(m_repeatButton, &QPushButton::clicked, this, &StatisticsWidget::onRepeatClicked);
+    connect(m_nextButton, &QPushButton::clicked, this, &StatisticsWidget::onNextClicked);
+
+    // Layout для кнопок
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addWidget(m_repeatButton);
+    buttonsLayout->addWidget(m_nextButton);
 
     // Добавляем все в основной layout
     mainLayout->addWidget(statsGroup);
-    mainLayout->addWidget(m_closeButton, 0, Qt::AlignRight);
+    mainLayout->addLayout(buttonsLayout);
 
     // Центрируем окно относительно родителя
     if (parent) {
@@ -85,7 +94,6 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     qDebug() << "Точек на графике:" << speedHistory.size();
 }
 
-// ДОБАВЛЕНО: Метод создания графика скорости
 void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory)
 {
     // Создаем серию данных для графика
@@ -139,7 +147,16 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     m_chartView->setMinimumHeight(250);
 }
 
-void StatisticsWidget::closeWindow()
+void StatisticsWidget::onRepeatClicked()
 {
-    this->close();
+    qDebug() << "Кнопка 'Повторить' нажата";
+    emit repeatRequested();  // Испускаем сигнал
+    this->close();           // Закрываем окно
+}
+
+void StatisticsWidget::onNextClicked()
+{
+    qDebug() << "Кнопка 'Дальше' нажата";
+    emit nextRequested();    // Испускаем сигнал
+    this->close();           // Закрываем окно
 }

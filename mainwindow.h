@@ -29,6 +29,9 @@ private slots:
     void onResetButtonClicked();
     void onCloseChoseButtonClicked();
     void showTypingResults();  // Показ статистики
+    // ДОБАВЛЕНО: Слоты для обработки кнопок статистики
+    void onStatsRepeatRequested();
+    void onStatsNextRequested();
 
 private:
     void applyButtonStyle();

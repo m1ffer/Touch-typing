@@ -19,17 +19,23 @@ class StatisticsWidget : public QWidget
 public:
     explicit StatisticsWidget(double accuracy, double speedCpm,
                               qint64 timeMs, int errorsCount, int totalChars,
-                              const QVector<QPair<qint64, double>>& speedHistory,  // Добавили историю
+                              const QVector<QPair<qint64, double>>& speedHistory,
                               QWidget *parent = nullptr);
 
+signals:
+    void repeatRequested();  // Сигнал для кнопки "Повторить"
+    void nextRequested();    // Сигнал для кнопки "Дальше"
+
 private slots:
-    void closeWindow();
+    void onRepeatClicked();  // Слот для кнопки "Повторить"
+    void onNextClicked();    // Слот для кнопки "Дальше"
 
 private:
     void createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory);
 
-    QPushButton *m_closeButton;
-    QChartView *m_chartView;  // Для отображения графика
+    QPushButton *m_repeatButton;  // Кнопка "Повторить"
+    QPushButton *m_nextButton;    // Кнопка "Дальше"
+    QChartView *m_chartView;
 };
 
 #endif // STATISTICSWIDGET_H
