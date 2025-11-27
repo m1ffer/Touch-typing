@@ -5,6 +5,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QTime>
+#include "SettingsDialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,10 +29,10 @@ private slots:
     void onTypingTimerUpdated(qint64 elapsedTime);
     void onResetButtonClicked();
     void onCloseChoseButtonClicked();
-    void showTypingResults();  // Показ статистики
-    // ДОБАВЛЕНО: Слоты для обработки кнопок статистики
+    void showTypingResults();
     void onStatsRepeatRequested();
     void onStatsNextRequested();
+    void onSettingsButtonClicked();
 
 private:
     void applyButtonStyle();
@@ -43,6 +44,7 @@ private:
     Ui::MainWindow *ui;
     QButtonGroup *modeButtonGroup;
     int m_currentLessonId;
+    SettingsDialog *m_settingsDialog;
 };
 
 #endif // MAINWINDOW_H

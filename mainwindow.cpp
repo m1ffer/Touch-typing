@@ -12,12 +12,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , modeButtonGroup(new QButtonGroup(this))
     , m_currentLessonId(0)
+    , m_settingsDialog(nullptr)
 {
     ui->setupUi(this);
 
     qDebug() << "=== Начало инициализации MainWindow ===";
 
-    // Находим кнопки по их objectName
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");
     QPushButton *learnButton = findChild<QPushButton*>("learnButton");
 
@@ -26,8 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(learnButton, &QPushButton::clicked, this, &MainWindow::onLearnModeClicked);
         connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
         connect(ui->closeChoseButton, &QPushButton::clicked, this, &MainWindow::onCloseChoseButtonClicked);
-
-        // ДОБАВИТЬ подключение сигнала завершения ввода
+        connect(ui->settingsButton, &QPushButton::clicked, this, &MainWindow::onSettingsButtonClicked);
         connect(ui->typingInput, &TypingInput::inputCompleted, this, &MainWindow::showTypingResults);
 
         applyButtonStyle();
@@ -411,6 +410,20 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete modeButtonGroup;
+    if (m_settingsDialog) {
+        delete m_settingsDialog;
+    }
+}
+
+void MainWindow::onSettingsButtonClicked()
+{
+    qDebug() << "Кнопка настроек нажата";
+
+    if (!m_settingsDialog) {
+        m_settingsDialog = new SettingsDialog(this);
+    }
+
+    m_settingsDialog->exec();
 }
 
 

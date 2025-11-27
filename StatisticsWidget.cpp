@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QScreen>
 
+
 StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
                                    qint64 timeMs, int errorsCount, int totalChars,
                                    const QVector<QPair<qint64, double>>& speedHistory,
@@ -10,7 +11,8 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     : QWidget(parent)
 {
     setWindowTitle("Результаты тренировки");
-    setMinimumSize(500, 600);
+    setMinimumSize(900, 800);
+    resize(950, 850);
 
     // Устанавливаем модальность и убираем кнопки управления
     setWindowModality(Qt::ApplicationModal);
@@ -65,14 +67,20 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     m_repeatButton = new QPushButton("Повторить", this);
     m_nextButton = new QPushButton("Дальше", this);
 
+    // Увеличим размер кнопок
+    m_repeatButton->setMinimumSize(120, 35);
+    m_nextButton->setMinimumSize(120, 35);
+
     // Подключаем кнопки к слотам
     connect(m_repeatButton, &QPushButton::clicked, this, &StatisticsWidget::onRepeatClicked);
     connect(m_nextButton, &QPushButton::clicked, this, &StatisticsWidget::onNextClicked);
 
     // Layout для кнопок
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addStretch();
     buttonsLayout->addWidget(m_repeatButton);
     buttonsLayout->addWidget(m_nextButton);
+    buttonsLayout->addStretch();
 
     // Добавляем все в основной layout
     mainLayout->addWidget(statsGroup);
@@ -84,14 +92,6 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
         QPoint center = parentRect.center();
         move(center - rect().center());
     }
-
-    qDebug() << "=== СТАТИСТИКА ===";
-    qDebug() << "Время:" << timeMs << "мс (" << timeString << ")";
-    qDebug() << "Точность:" << accuracy << "%";
-    qDebug() << "Скорость CPM:" << speedCpm;
-    qDebug() << "Ошибки:" << errorsCount;
-    qDebug() << "Символов:" << totalChars;
-    qDebug() << "Точек на графике:" << speedHistory.size();
 }
 
 void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory)
@@ -100,9 +100,36 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     QLineSeries *series = new QLineSeries();
     series->setName("Скорость (симв/мин)");
 
+    // Увеличиваем толщину линии
+    QPen pen = series->pen();
+    pen.setWidth(2);
+    series->setPen(pen);
+
+    // Простое сглаживание данных (скользящее среднее)
+    QVector<QPair<qint64, double>> smoothedHistory;
+    const int windowSize = 3; // Размер окна для сглаживания
+
+    for (int i = 0; i < speedHistory.size(); ++i) {
+        double sum = 0;
+        int count = 0;
+
+        // Берем окно вокруг текущей точки
+        for (int j = qMax(0, i - windowSize); j <= qMin(speedHistory.size() - 1, i + windowSize); ++j) {
+            sum += speedHistory[j].second;
+            count++;
+        }
+
+        double smoothedValue = sum / count;
+        smoothedHistory.append(qMakePair(speedHistory[i].first, smoothedValue));
+    }
+
+    // Используем сглаженные данные или исходные, если точек мало
+    const QVector<QPair<qint64, double>>& dataToUse =
+        (speedHistory.size() > 10) ? smoothedHistory : speedHistory;
+
     // Добавляем точки данных (время в секундах, скорость в CPM)
-    for (const auto& point : speedHistory) {
-        double timeInSeconds = point.first / 1000.0;  // конвертируем мс в секунды
+    for (const auto& point : dataToUse) {
+        double timeInSeconds = point.first / 1000.0;
         series->append(timeInSeconds, point.second);
     }
 
@@ -112,51 +139,93 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     chart->setTitle("Динамика скорости во время тренировки");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
+    // Увеличиваем размер шрифта заголовка
+    QFont titleFont = chart->titleFont();
+    titleFont.setPointSize(16);
+    titleFont.setBold(true);
+    chart->setTitleFont(titleFont);
+
     // Настраиваем ось X (время в секундах)
     QValueAxis *axisX = new QValueAxis();
     axisX->setTitleText("Время (секунды)");
-    axisX->setLabelFormat("%.1f");
-    axisX->setMin(0);
+    axisX->setTitleFont(QFont("Arial", 12, QFont::Bold));
+
     if (!speedHistory.isEmpty()) {
         double maxTime = speedHistory.last().first / 1000.0;
-        axisX->setMax(maxTime);
+        axisX->setRange(0, maxTime);
+
+        // Используем константу для количества делений
+        axisX->setTickCount(TIME_AXIS_TICKS);
+
+        // Форматируем подписи как целые числа для лучшей читаемости
+        axisX->setLabelFormat("%.0f");
+    } else {
+        axisX->setRange(0, 10);
+        axisX->setTickCount(TIME_AXIS_TICKS);
     }
+
+    // Увеличиваем шрифт подписей на оси X
+    QFont axisFont = axisX->labelsFont();
+    axisFont.setPointSize(9);
+    axisX->setLabelsFont(axisFont);
+
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
     // Настраиваем ось Y (скорость в CPM)
     QValueAxis *axisY = new QValueAxis();
     axisY->setTitleText("Скорость (симв/мин)");
-    axisY->setMin(0);
+    axisY->setTitleFont(QFont("Arial", 12, QFont::Bold));
 
-    // Находим максимальную скорость для установки верхней границы
+    // Находим максимальную скорость
     double maxSpeed = 0;
     for (const auto& point : speedHistory) {
         if (point.second > maxSpeed) {
             maxSpeed = point.second;
         }
     }
-    axisY->setMax(qMax(maxSpeed * 1.1, 100.0)); // Добавляем 10% запаса
+
+    // Устанавливаем диапазон с запасом
+    axisY->setMin(0);
+    double upperBound = qMax(maxSpeed * 1.1, 50.0);
+    axisY->setMax(upperBound);
+
+    // Используем константу для количества делений
+    axisY->setTickCount(SPEED_AXIS_TICKS);
+
+    // Форматируем подписи как целые числа
+    axisY->setLabelFormat("%.0f");
+
+    // Увеличиваем шрифт подписей на оси Y
+    axisY->setLabelsFont(axisFont);
 
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
+    // Устанавливаем темную тему для графика
+    chart->setTheme(QChart::ChartThemeDark);
+
+    // Улучшаем легенду
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
     // Создаем view для графика
     m_chartView = new QChartView(chart);
     m_chartView->setRenderHint(QPainter::Antialiasing);
-    m_chartView->setMinimumHeight(250);
+    m_chartView->setMinimumHeight(500);
+    m_chartView->setMinimumWidth(800);
 }
 
 void StatisticsWidget::onRepeatClicked()
 {
     qDebug() << "Кнопка 'Повторить' нажата";
-    emit repeatRequested();  // Испускаем сигнал
-    this->close();           // Закрываем окно
+    emit repeatRequested();
+    this->close();
 }
 
 void StatisticsWidget::onNextClicked()
 {
     qDebug() << "Кнопка 'Дальше' нажата";
-    emit nextRequested();    // Испускаем сигнал
-    this->close();           // Закрываем окно
+    emit nextRequested();
+    this->close();
 }
