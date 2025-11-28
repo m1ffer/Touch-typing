@@ -8,7 +8,7 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
-#include "ToggleSwitch.h"  // Добавим включение нашего заголовка
+#include "ToggleSwitch.h"
 
 class SettingsDialog : public QDialog
 {
@@ -18,21 +18,30 @@ public:
     explicit SettingsDialog(QWidget *parent = nullptr);
 
 private slots:
-    void onLanguageToggled(int id, bool checked);
+    void onAppLanguageToggled(int id, bool checked);
+    void onTrainingLanguageToggled(int id, bool checked);
     void onTrainingModeToggled(int id, bool checked);
     void onHighlightToggleClicked(bool checked);
     void onKeyboardToggleClicked(bool checked);
 
 private:
     void initializeUI();
-    void createLanguageSettings();
+    void createAppLanguageSettings();
+    void createTrainingLanguageSettings();
     void createTrainingSettings();
     void createLearningSettings();
 
-    QButtonGroup *m_languageGroup;
-    QRadioButton *m_englishRadio;
-    QRadioButton *m_russianRadio;
+    // Язык приложения
+    QButtonGroup *m_appLanguageGroup;
+    QRadioButton *m_appRussianRadio;
+    QRadioButton *m_appEnglishRadio;
 
+    // Язык обучения
+    QButtonGroup *m_trainingLanguageGroup;
+    QRadioButton *m_trainingRussianRadio;
+    QRadioButton *m_trainingEnglishRadio;
+
+    // Режим тренировки
     QButtonGroup *m_trainingGroup;
     QRadioButton *m_shortWordsRadio;
     QRadioButton *m_longWordsRadio;
@@ -40,7 +49,7 @@ private:
     QRadioButton *m_numbersRadio;
     QRadioButton *m_quotesRadio;
 
-    // Заменим QCheckBox на ToggleSwitch
+    // Режим обучения
     ToggleSwitch *m_highlightToggle;
     ToggleSwitch *m_keyboardToggle;
 };

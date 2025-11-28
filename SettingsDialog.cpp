@@ -4,12 +4,13 @@
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
-    , m_languageGroup(nullptr)
+    , m_appLanguageGroup(nullptr)
+    , m_trainingLanguageGroup(nullptr)
     , m_trainingGroup(nullptr)
 {
     setWindowTitle("Настройки");
     setModal(true);
-    setFixedSize(400, 450);
+    setFixedSize(400, 550);
 
     initializeUI();
 }
@@ -18,37 +19,66 @@ void SettingsDialog::initializeUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    createLanguageSettings();
+    createAppLanguageSettings();
+    createTrainingLanguageSettings();
     createTrainingSettings();
     createLearningSettings();
 
     mainLayout->addStretch();
 }
 
-void SettingsDialog::createLanguageSettings()
+void SettingsDialog::createAppLanguageSettings()
 {
-    QGroupBox *languageGroup = new QGroupBox("Язык", this);
-    QVBoxLayout *layout = new QVBoxLayout(languageGroup);
+    QGroupBox *appLanguageGroup = new QGroupBox("Язык приложения / Application language", this);
+    QVBoxLayout *layout = new QVBoxLayout(appLanguageGroup);
 
-    m_languageGroup = new QButtonGroup(this);
-    m_englishRadio = new QRadioButton("Английский", languageGroup);
-    m_russianRadio = new QRadioButton("Русский", languageGroup);
+    m_appLanguageGroup = new QButtonGroup(this);
+    m_appRussianRadio = new QRadioButton("Русский", appLanguageGroup);
+    m_appEnglishRadio = new QRadioButton("English", appLanguageGroup);
 
-    m_russianRadio->setChecked(true);
+    // По умолчанию русский
+    m_appRussianRadio->setChecked(true);
 
-    m_languageGroup->addButton(m_englishRadio, 0);
-    m_languageGroup->addButton(m_russianRadio, 1);
+    m_appLanguageGroup->addButton(m_appRussianRadio, 0);
+    m_appLanguageGroup->addButton(m_appEnglishRadio, 1);
 
-    connect(m_languageGroup, &QButtonGroup::buttonToggled, [this](QAbstractButton *button, bool checked) {
-        int id = m_languageGroup->id(button);
-        onLanguageToggled(id, checked);
+    connect(m_appLanguageGroup, &QButtonGroup::buttonToggled, [this](QAbstractButton *button, bool checked) {
+        int id = m_appLanguageGroup->id(button);
+        onAppLanguageToggled(id, checked);
     });
 
-    layout->addWidget(m_englishRadio);
-    layout->addWidget(m_russianRadio);
+    layout->addWidget(m_appRussianRadio);
+    layout->addWidget(m_appEnglishRadio);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(0, languageGroup);
+    mainLayout->insertWidget(0, appLanguageGroup);
+}
+
+void SettingsDialog::createTrainingLanguageSettings()
+{
+    QGroupBox *trainingLanguageGroup = new QGroupBox("Язык обучения", this);
+    QVBoxLayout *layout = new QVBoxLayout(trainingLanguageGroup);
+
+    m_trainingLanguageGroup = new QButtonGroup(this);
+    m_trainingRussianRadio = new QRadioButton("Русский", trainingLanguageGroup);
+    m_trainingEnglishRadio = new QRadioButton("Английский", trainingLanguageGroup);
+
+    // По умолчанию русский
+    m_trainingRussianRadio->setChecked(true);
+
+    m_trainingLanguageGroup->addButton(m_trainingRussianRadio, 0);
+    m_trainingLanguageGroup->addButton(m_trainingEnglishRadio, 1);
+
+    connect(m_trainingLanguageGroup, &QButtonGroup::buttonToggled, [this](QAbstractButton *button, bool checked) {
+        int id = m_trainingLanguageGroup->id(button);
+        onTrainingLanguageToggled(id, checked);
+    });
+
+    layout->addWidget(m_trainingRussianRadio);
+    layout->addWidget(m_trainingEnglishRadio);
+
+    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
+    mainLayout->insertWidget(1, trainingLanguageGroup);
 }
 
 void SettingsDialog::createTrainingSettings()
@@ -83,7 +113,7 @@ void SettingsDialog::createTrainingSettings()
     layout->addWidget(m_quotesRadio);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(1, trainingGroup);
+    mainLayout->insertWidget(2, trainingGroup);
 }
 
 void SettingsDialog::createLearningSettings()
@@ -117,10 +147,16 @@ void SettingsDialog::createLearningSettings()
     layout->addLayout(keyboardLayout);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(2, learningGroup);
+    mainLayout->insertWidget(3, learningGroup);
 }
 
-void SettingsDialog::onLanguageToggled(int id, bool checked)
+void SettingsDialog::onAppLanguageToggled(int id, bool checked)
+{
+    Q_UNUSED(id)
+    Q_UNUSED(checked)
+}
+
+void SettingsDialog::onTrainingLanguageToggled(int id, bool checked)
 {
     Q_UNUSED(id)
     Q_UNUSED(checked)

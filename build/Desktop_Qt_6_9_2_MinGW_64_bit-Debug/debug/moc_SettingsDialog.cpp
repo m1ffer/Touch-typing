@@ -40,30 +40,35 @@ template <> constexpr inline auto SettingsDialog::qt_create_metaobjectdata<qt_me
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "SettingsDialog",
-        "onLanguageToggled",
+        "onAppLanguageToggled",
         "",
         "id",
         "checked",
+        "onTrainingLanguageToggled",
         "onTrainingModeToggled",
         "onHighlightToggleClicked",
         "onKeyboardToggleClicked"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onLanguageToggled'
+        // Slot 'onAppLanguageToggled'
         QtMocHelpers::SlotData<void(int, bool)>(1, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Int, 3 }, { QMetaType::Bool, 4 },
         }}),
-        // Slot 'onTrainingModeToggled'
+        // Slot 'onTrainingLanguageToggled'
         QtMocHelpers::SlotData<void(int, bool)>(5, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Int, 3 }, { QMetaType::Bool, 4 },
         }}),
+        // Slot 'onTrainingModeToggled'
+        QtMocHelpers::SlotData<void(int, bool)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 3 }, { QMetaType::Bool, 4 },
+        }}),
         // Slot 'onHighlightToggleClicked'
-        QtMocHelpers::SlotData<void(bool)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
+        QtMocHelpers::SlotData<void(bool)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Bool, 4 },
         }}),
         // Slot 'onKeyboardToggleClicked'
-        QtMocHelpers::SlotData<void(bool)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
+        QtMocHelpers::SlotData<void(bool)>(8, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Bool, 4 },
         }}),
     };
@@ -89,10 +94,11 @@ void SettingsDialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     auto *_t = static_cast<SettingsDialog *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onLanguageToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 1: _t->onTrainingModeToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 2: _t->onHighlightToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 3: _t->onKeyboardToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 0: _t->onAppLanguageToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
+        case 1: _t->onTrainingLanguageToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
+        case 2: _t->onTrainingModeToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
+        case 3: _t->onHighlightToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 4: _t->onKeyboardToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
         default: ;
         }
     }
@@ -117,14 +123,14 @@ int SettingsDialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 5;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 5;
     }
     return _id;
 }
