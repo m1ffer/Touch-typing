@@ -16,6 +16,25 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Загрузка 6 файлов с использованием языка из парсера
+    auto quoteData = JSONParser::parseQuotes("res/languages/russian/quotes.json");
+    quotes[quoteData.first] = quoteData.second;
+
+    quoteData = JSONParser::parseQuotes("res/languages/english/quotes.json");
+    quotes[quoteData.first] = quoteData.second;
+
+    auto wordsData = JSONParser::parseWords("res/languages/russian/shortWords.json");
+    shortWords[wordsData.first] = wordsData.second;
+
+    wordsData = JSONParser::parseWords("res/languages/english/shortWords.json");
+    shortWords[wordsData.first] = wordsData.second;
+
+    wordsData = JSONParser::parseWords("res/languages/russian/longWords.json");
+    longWords[wordsData.first] = wordsData.second;
+
+    wordsData = JSONParser::parseWords("res/languages/english/longWords.json");
+    longWords[wordsData.first] = wordsData.second;
+
     qDebug() << "=== Начало инициализации MainWindow ===";
 
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");

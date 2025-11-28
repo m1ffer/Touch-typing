@@ -45,7 +45,11 @@ template <> constexpr inline auto SettingsDialog::qt_create_metaobjectdata<qt_me
         "id",
         "checked",
         "onTrainingLanguageToggled",
-        "onTrainingModeToggled",
+        "onShortWordsToggled",
+        "onLongWordsToggled",
+        "onPunctuationToggled",
+        "onNumbersToggled",
+        "onQuotesToggled",
         "onHighlightToggleClicked",
         "onKeyboardToggleClicked"
     };
@@ -59,16 +63,32 @@ template <> constexpr inline auto SettingsDialog::qt_create_metaobjectdata<qt_me
         QtMocHelpers::SlotData<void(int, bool)>(5, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Int, 3 }, { QMetaType::Bool, 4 },
         }}),
-        // Slot 'onTrainingModeToggled'
-        QtMocHelpers::SlotData<void(int, bool)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 3 }, { QMetaType::Bool, 4 },
+        // Slot 'onShortWordsToggled'
+        QtMocHelpers::SlotData<void(bool)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Bool, 4 },
         }}),
-        // Slot 'onHighlightToggleClicked'
+        // Slot 'onLongWordsToggled'
         QtMocHelpers::SlotData<void(bool)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Bool, 4 },
         }}),
-        // Slot 'onKeyboardToggleClicked'
+        // Slot 'onPunctuationToggled'
         QtMocHelpers::SlotData<void(bool)>(8, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Bool, 4 },
+        }}),
+        // Slot 'onNumbersToggled'
+        QtMocHelpers::SlotData<void(bool)>(9, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Bool, 4 },
+        }}),
+        // Slot 'onQuotesToggled'
+        QtMocHelpers::SlotData<void(bool)>(10, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Bool, 4 },
+        }}),
+        // Slot 'onHighlightToggleClicked'
+        QtMocHelpers::SlotData<void(bool)>(11, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Bool, 4 },
+        }}),
+        // Slot 'onKeyboardToggleClicked'
+        QtMocHelpers::SlotData<void(bool)>(12, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::Bool, 4 },
         }}),
     };
@@ -96,9 +116,13 @@ void SettingsDialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         switch (_id) {
         case 0: _t->onAppLanguageToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
         case 1: _t->onTrainingLanguageToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 2: _t->onTrainingModeToggled((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[2]))); break;
-        case 3: _t->onHighlightToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
-        case 4: _t->onKeyboardToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 2: _t->onShortWordsToggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 3: _t->onLongWordsToggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 4: _t->onPunctuationToggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 5: _t->onNumbersToggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 6: _t->onQuotesToggled((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 7: _t->onHighlightToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
+        case 8: _t->onKeyboardToggleClicked((*reinterpret_cast< std::add_pointer_t<bool>>(_a[1]))); break;
         default: ;
         }
     }
@@ -123,14 +147,14 @@ int SettingsDialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 9;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 9)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 5;
+        _id -= 9;
     }
     return _id;
 }

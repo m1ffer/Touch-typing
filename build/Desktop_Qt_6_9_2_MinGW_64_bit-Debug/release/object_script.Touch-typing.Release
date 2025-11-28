@@ -1,4 +1,5 @@
 release/ControlButton.o
+release/JSONParser.o
 release/ScrollButtonWidget.o
 release/SettingsDialog.o
 release/StatisticsWidget.o

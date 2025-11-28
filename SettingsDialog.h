@@ -8,6 +8,7 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
+#include <QCloseEvent>
 #include "ToggleSwitch.h"
 
 class SettingsDialog : public QDialog
@@ -17,10 +18,17 @@ class SettingsDialog : public QDialog
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void onAppLanguageToggled(int id, bool checked);
     void onTrainingLanguageToggled(int id, bool checked);
-    void onTrainingModeToggled(int id, bool checked);
+    void onShortWordsToggled(bool checked);
+    void onLongWordsToggled(bool checked);
+    void onPunctuationToggled(bool checked);
+    void onNumbersToggled(bool checked);
+    void onQuotesToggled(bool checked);
     void onHighlightToggleClicked(bool checked);
     void onKeyboardToggleClicked(bool checked);
 
@@ -30,6 +38,25 @@ private:
     void createTrainingLanguageSettings();
     void createTrainingSettings();
     void createLearningSettings();
+    void updateQuotesState(bool checked);
+    void saveInitialStates();  // Сохраняем начальные состояния
+    void compareStates();      // Сравниваем состояния при закрытии
+
+    // Структура для хранения состояний переключателей
+    struct SettingsState {
+        int appLanguageId;
+        int trainingLanguageId;
+        bool shortWords;
+        bool longWords;
+        bool punctuation;
+        bool numbers;
+        bool quotes;
+        bool highlight;
+        bool keyboard;
+    };
+
+    SettingsState m_initialState;  // Начальные состояния
+    SettingsState m_currentState;  // Текущие состояния
 
     // Язык приложения
     QButtonGroup *m_appLanguageGroup;
@@ -42,12 +69,11 @@ private:
     QRadioButton *m_trainingEnglishRadio;
 
     // Режим тренировки
-    QButtonGroup *m_trainingGroup;
-    QRadioButton *m_shortWordsRadio;
-    QRadioButton *m_longWordsRadio;
-    QRadioButton *m_punctuationRadio;
-    QRadioButton *m_numbersRadio;
-    QRadioButton *m_quotesRadio;
+    ToggleSwitch *m_shortWordsToggle;
+    ToggleSwitch *m_longWordsToggle;
+    ToggleSwitch *m_punctuationToggle;
+    ToggleSwitch *m_numbersToggle;
+    ToggleSwitch *m_quotesToggle;
 
     // Режим обучения
     ToggleSwitch *m_highlightToggle;
