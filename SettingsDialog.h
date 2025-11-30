@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QCloseEvent>
 #include "ToggleSwitch.h"
+#include "JSONParser.h"
 
 class SettingsDialog : public QDialog
 {
@@ -17,7 +18,7 @@ class SettingsDialog : public QDialog
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
-
+    Settings getCurrentSettings() const { return m_currentState; }
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -32,50 +33,37 @@ private slots:
     void onHighlightToggleClicked(bool checked);
     void onKeyboardToggleClicked(bool checked);
 
+
 private:
+    void applySettings(const Settings&);
     void initializeUI();
     void createAppLanguageSettings();
     void createTrainingLanguageSettings();
     void createTrainingSettings();
     void createLearningSettings();
     void updateQuotesState(bool checked);
-    void saveInitialStates();  // Сохраняем начальные состояния
-    void compareStates();      // Сравниваем состояния при закрытии
+    void saveInitialStates();
+    void compareStates();
+    void loadSettings();
+    void saveSettings();
 
-    // Структура для хранения состояний переключателей
-    struct SettingsState {
-        int appLanguageId;
-        int trainingLanguageId;
-        bool shortWords;
-        bool longWords;
-        bool punctuation;
-        bool numbers;
-        bool quotes;
-        bool highlight;
-        bool keyboard;
-    };
+    Settings m_initialState;
+    Settings m_currentState;
 
-    SettingsState m_initialState;  // Начальные состояния
-    SettingsState m_currentState;  // Текущие состояния
-
-    // Язык приложения
     QButtonGroup *m_appLanguageGroup;
     QRadioButton *m_appRussianRadio;
     QRadioButton *m_appEnglishRadio;
 
-    // Язык обучения
     QButtonGroup *m_trainingLanguageGroup;
     QRadioButton *m_trainingRussianRadio;
     QRadioButton *m_trainingEnglishRadio;
 
-    // Режим тренировки
     ToggleSwitch *m_shortWordsToggle;
     ToggleSwitch *m_longWordsToggle;
     ToggleSwitch *m_punctuationToggle;
     ToggleSwitch *m_numbersToggle;
     ToggleSwitch *m_quotesToggle;
 
-    // Режим обучения
     ToggleSwitch *m_highlightToggle;
     ToggleSwitch *m_keyboardToggle;
 };

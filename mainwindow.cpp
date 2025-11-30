@@ -15,28 +15,11 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settingsDialog(nullptr)
 {
     ui->setupUi(this);
-
-    // Загрузка 6 файлов с использованием языка из парсера
-    auto quoteData = JSONParser::parseQuotes("res/languages/russian/quotes.json");
-    quotes[quoteData.first] = quoteData.second;
-
-    quoteData = JSONParser::parseQuotes("res/languages/english/quotes.json");
-    quotes[quoteData.first] = quoteData.second;
-
-    auto wordsData = JSONParser::parseWords("res/languages/russian/shortWords.json");
-    shortWords[wordsData.first] = wordsData.second;
-
-    wordsData = JSONParser::parseWords("res/languages/english/shortWords.json");
-    shortWords[wordsData.first] = wordsData.second;
-
-    wordsData = JSONParser::parseWords("res/languages/russian/longWords.json");
-    longWords[wordsData.first] = wordsData.second;
-
-    wordsData = JSONParser::parseWords("res/languages/english/longWords.json");
-    longWords[wordsData.first] = wordsData.second;
-
+    m_currentMode = ui -> trainButton->text();
+    m_settingsDialog = new SettingsDialog(this);
+    m_currentSettings = m_settingsDialog->getCurrentSettings();
+    updateTrainingText();
     qDebug() << "=== Начало инициализации MainWindow ===";
-
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");
     QPushButton *learnButton = findChild<QPushButton*>("learnButton");
 
@@ -55,21 +38,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     setStyleSheet("background-color: #1a1a1a; color: #e6e6e6;");
 
-    // Прямой доступ к TypingInput через UI
-    TypingInput *input = ui->typingInput;
-    input->setTargetText("Этопримертекстадлятренировкислепойпечати...");
-
+    TypingInput* input = ui -> typingInput;
     // Подключаем сигналы таймера
     connect(input, &TypingInput::timerStarted, this, &MainWindow::onTypingTimerStarted);
     connect(input, &TypingInput::timerStopped, this, &MainWindow::onTypingTimerStopped);
     connect(input, &TypingInput::timerUpdated, this, &MainWindow::onTypingTimerUpdated);
-
-    // Сбрасываем отображение таймера
-    resetTimerDisplay();
-
     // Устанавливаем начальную страницу
     initializeLessons();
-    switchToTrainingMode();
+    ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
+    m_currentMode = ui -> trainButton-> text();
 
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
@@ -143,10 +120,14 @@ void MainWindow::applyButtonStyle()
 
 void MainWindow::onTrainModeClicked()
 {
-    qDebug() << "Режим тренировки активирован";
-    switchToTrainingMode();
-    // Логика для режима тренировки
 
+    qDebug() << "Режим тренировки активирован";
+    if (m_currentMode == ui -> trainButton -> text())
+        updateTrainingText();
+    else
+        switchToTrainingMode();
+    // Логика для режима тренировки
+    // ДОБАВЛЕНО: Обновляем текст при переключении на тренировку
 }
 
 void MainWindow::onLearnModeClicked()
@@ -162,6 +143,8 @@ void MainWindow::switchToTrainingMode()
 {
     // Переключаем modesStackedWidget на страницу inputMode
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
+    updateTrainingText();
+    m_currentMode = ui -> trainButton-> text();
     qDebug() << "Переключено на страницу тренировки (inputMode)";
 }
 
@@ -299,26 +282,23 @@ void MainWindow::resetTimerDisplay()
 // Модифицируем метод выбора урока
 void MainWindow::onLessonSelected(const QString &text, const QVariant &data)
 {
+    m_currentMode = ui -> learnButton -> text();
     int lessonId = data.toInt();
     m_currentLessonId = lessonId; // ДОБАВЛЕНО: Сохраняем ID текущего урока
 
     qDebug() << "Выбран урок:" << text << "ID:" << lessonId;
 
     // Сбрасываем таймер при выборе нового урока
-    ui->typingInput->reset();
     resetTimerDisplay();
 
     // Переключаемся обратно на страницу тренировки
-    switchToTrainingMode();
-
-    // Устанавливаем пример текста в зависимости от выбранного урока
-    //QString lessonText = getLessonText(lessonId);
-    //ui->typingInput->setTargetText(lessonText);
+    //добавить туда сюда текст
+    ui->modesStackedWidget->setCurrentWidget(ui -> inputMode);
 }
 
 void MainWindow::onCloseChoseButtonClicked(){
-    switchToTrainingMode();
-    onResetButtonClicked();
+    ui->modesStackedWidget->setCurrentWidget(ui -> inputMode);
+    //ui -> modesStackedWidget ->
 }
 
 // ДОБАВИТЬ метод для расчета и показа статистики
@@ -423,26 +403,60 @@ void MainWindow::onStatsNextRequested()
     qDebug() << "Обработка кнопки 'Дальше'";
     // Можно добавить логику перехода к следующему уроку
     // или другой функционал в будущем
+    if (m_currentMode == ui -> trainButton -> text()){
+        updateTrainingText();
+    }
+    else{
+        qDebug() << "Переход к следующему уроку не реализован";
+    }
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete modeButtonGroup;
-    if (m_settingsDialog) {
-        delete m_settingsDialog;
-    }
+    delete m_settingsDialog;
 }
 
 void MainWindow::onSettingsButtonClicked()
 {
     qDebug() << "Кнопка настроек нажата";
-
-    if (!m_settingsDialog) {
-        m_settingsDialog = new SettingsDialog(this);
-    }
+    // Сохраняем текущие настройки до открытия диалога
+            Settings oldSettings = m_currentSettings;
 
     m_settingsDialog->exec();
+
+    // Получаем обновленные настройки после закрытия диалога
+    m_currentSettings = m_settingsDialog->getCurrentSettings();
+
+    // ДОБАВЛЕНО: Проверяем, изменились ли настройки тренировки
+    bool trainingSettingsChanged =
+        (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage) ||
+        (oldSettings.shortWords != m_currentSettings.shortWords) ||
+        (oldSettings.longWords != m_currentSettings.longWords) ||
+        (oldSettings.punctuation != m_currentSettings.punctuation) ||
+        (oldSettings.numbers != m_currentSettings.numbers) ||
+        (oldSettings.quotes != m_currentSettings.quotes);
+
+    if (trainingSettingsChanged)
+    {
+        if (m_currentMode == ui -> trainButton -> text()) {
+            qDebug() << "Настройки тренировки изменились, обновляем текст";
+            updateTrainingText();
+        }
+        else{
+
+        }
+    }
 }
 
+// ДОБАВЛЕНО: Метод для обновления текста тренировки
+void MainWindow::updateTrainingText()
+{
+    QString trainingText = ui->typingInput->makeTextFromSettings(m_currentSettings);
+    ui->typingInput->setTargetText(trainingText);
+    updateTimerDisplay(0);
+    qDebug() << "Текст тренировки обновлен по настройкам";
+
+}
 

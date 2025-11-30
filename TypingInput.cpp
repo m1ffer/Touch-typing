@@ -3,8 +3,15 @@
 #include <QTextBlock>
 #include <QDebug>
 #include <QFile>
+#include <QDir>
+#include <QStringList>
 #include <QTextStream>
+#include <algorithm> // ДОБАВИТЬ для std::shuffle
 #include <QRegularExpression>
+
+// ДОБАВЛЕНО: Определение констант
+const double TypingInput::PUNCTUATION_PROBABILITY = 0.3; // 30% вероятность пунктуации
+const double TypingInput::NUMBER_PROBABILITY = 0.2;      // 20% вероятность числа
 
 TypingInput::TypingInput(QWidget *parent)
     : QTextEdit(parent),
@@ -17,8 +24,10 @@ TypingInput::TypingInput(QWidget *parent)
     m_errorsCount(0),
     m_totalCharsTyped(0),
     m_timerActive(false),
-    m_finalTimeMs(0) // ДОБАВИТЬ
+    m_finalTimeMs(0),
+    m_gen(m_rd())
 {
+    initializeStandartText();
     // Настройка внешнего вида
     setFrameStyle(QFrame::NoFrame);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -53,6 +62,27 @@ TypingInput::TypingInput(QWidget *parent)
         }
     });
 
+    // ДОБАВЛЕНО: Загрузка данных из JSON файлов
+    // Русские файлы
+    auto ruQuotes = JSONParser::parseQuotes("../../res/languages/russian/quotes.json");
+    quotes[ruQuotes.first] = ruQuotes.second;
+
+    auto ruShortWords = JSONParser::parseWords("../../res/languages/russian/shortWords.json");
+    shortWords[ruShortWords.first] = ruShortWords.second;
+
+    auto ruLongWords = JSONParser::parseWords("../../res/languages/russian/longWords.json");
+    longWords[ruLongWords.first] = ruLongWords.second;
+
+    // Английские файлы
+    auto enQuotes = JSONParser::parseQuotes("../../res/languages/english/quotes.json");
+    quotes[enQuotes.first] = enQuotes.second;
+
+    auto enShortWords = JSONParser::parseWords("../../res/languages/english/shortWords.json");
+    shortWords[enShortWords.first] = enShortWords.second;
+
+    auto enLongWords = JSONParser::parseWords("../../res/languages/english/longWords.json");
+    longWords[enLongWords.first] = enLongWords.second;
+
     // Начальные настройки
     updateStyle();
 }
@@ -84,20 +114,16 @@ void TypingInput::setTargetText(const QString &text)
     updateCursorPosition();
 
     updateTextColors();
-}
-
-void TypingInput::reset()
-{
-    m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
-    m_currentPosition = 0;
-    // ДОБАВЛЕНО: Сбрасываем таймер
-    stopTimer();
-    setTargetText(m_targetText);
     m_errorsCount = 0; // ДОБАВЛЕНО
     m_totalCharsTyped = 0; // ДОБАВЛЕНО
     m_speedHistory.clear();     // ДОБАВИТЬ
     m_accuracyHistory.clear();  // ДОБАВИТЬ
     m_finalTimeMs = 0; // СБРАСЫВАЕМ время
+}
+
+void TypingInput::reset()
+{
+    setTargetText(m_targetText);
 }
 
 void TypingInput::keyPressEvent(QKeyEvent *event)
@@ -394,4 +420,179 @@ double TypingInput::getSpeedCpm() const
 {
     return m_speedHistory;
 }*/
+
+// ДОБАВЛЕНО: Реализация метода makeTextFromSettings
+QString TypingInput::makeTextFromSettings(const Settings& settings)
+{
+    // Если включены цитаты - возвращаем случайную цитату
+    if (settings.quotes) {
+        return QString::fromStdString(getRandomQuote(settings.trainingLanguage).text);
+    }
+    if (!settings.longWords && !settings.shortWords && !settings.numbers && !settings.punctuation){
+        //взять текст из файлика
+        return QString::fromStdString(standartText[settings.trainingLanguage]);
+    }
+    if (!settings.longWords && !settings.shortWords){
+        Settings tmp = settings;
+        tmp.longWords = tmp.shortWords = true;
+        return makeTextFromSettings(tmp);
+    }
+
+
+    // Генерируем случайное количество слов
+    std::uniform_int_distribution<> wordCountDist(MIN_WORDS, MAX_WORDS);
+    int wordCount = wordCountDist(m_gen);
+
+    QStringList words;
+
+    for (int i = 0; i < wordCount; ++i) {
+        QString word = getRandomWord(settings);
+
+        // Добавляем пунктуацию с вероятностью
+        if (settings.punctuation) {
+            std::uniform_real_distribution<> punctDist(0.0, 1.0);
+            if (punctDist(m_gen) < PUNCTUATION_PROBABILITY) {
+                word = addPunctuation(word);
+            }
+        }
+
+        // Добавляем число с вероятностью
+        if (settings.numbers) {
+            std::uniform_real_distribution<> numberDist(0.0, 1.0);
+            if (numberDist(m_gen) < NUMBER_PROBABILITY) {
+                word = addNumber(word);
+            }
+        }
+
+        words.append(word);
+    }
+
+    return words.join(" ");
+}
+
+// ДОБАВЛЕНО: Вспомогательные методы
+
+QString TypingInput::getRandomWord(const Settings& settings)
+{
+    const std::string& lang = settings.trainingLanguage;
+
+    // Определяем, из каких источников брать слова
+    bool useShort = settings.shortWords || (!settings.shortWords && !settings.longWords);
+    bool useLong = settings.longWords || (!settings.shortWords && !settings.longWords);
+
+    // Выбираем случайный источник
+    std::vector<const std::vector<Word>*> sources;
+
+    if (useShort && shortWords.count(lang) && !shortWords[lang].empty()) {
+        sources.push_back(&shortWords[lang]);
+    }
+    if (useLong && longWords.count(lang) && !longWords[lang].empty()) {
+        sources.push_back(&longWords[lang]);
+    }
+
+    if (sources.empty()) {
+        return "word"; // fallback
+    }
+
+    // Выбираем случайный источник
+    std::uniform_int_distribution<> sourceDist(0, sources.size() - 1);
+    const std::vector<Word>* selectedSource = sources[sourceDist(m_gen)];
+
+    // Выбираем случайное слово из выбранного источника
+    std::uniform_int_distribution<> wordDist(0, selectedSource->size() - 1);
+    return QString::fromStdString((*selectedSource)[wordDist(m_gen)]);
+}
+
+Quote TypingInput::getRandomQuote(const std::string& language)
+{
+    if (!quotes[language].empty()) {
+        std::uniform_int_distribution<> quoteDist(0, quotes[language].size() - 1);
+        return quotes[language][quoteDist(m_gen)];
+    }
+
+    return {"Default quote text", "Default", 0}; // fallback
+}
+
+QString TypingInput::capitalizeWord(const QString& word)
+{
+    if (word.isEmpty()) return word;
+    return word[0].toUpper() + word.mid(1);
+}
+
+QString TypingInput::addPunctuation(const QString& word)
+{
+    static const QVector<QString> punctuationMarks = {",", ".", "!", "?", ";", ":", "—"};
+    std::uniform_int_distribution<> punctDist(0, punctuationMarks.size() - 1);
+    std::uniform_int_distribution<> capDist(0, 1);
+    if (capDist(m_gen))
+        return capitalizeWord(word + punctuationMarks[punctDist(m_gen)]);
+    return word + punctuationMarks[punctDist(m_gen)];
+}
+
+QString TypingInput::addNumber(const QString& word)
+{
+    std::uniform_int_distribution<> numberDist(MIN_NUMBER, MAX_NUMBER);
+    int randomNumber = numberDist(m_gen);
+
+    return word + " " + QString::number(randomNumber);
+}
+
+void TypingInput::initializeStandartText() {
+    standartText.clear();
+
+    QDir directory(QString::fromStdString(PATH_TO_STANDART_TEXT));
+
+    // Проверяем существование директории
+    if (!directory.exists()) {
+        qDebug() << "Директория не существует:" << QString::fromStdString(PATH_TO_STANDART_TEXT);
+        return;
+    }
+
+    // Проверяем доступность директории для чтения
+    if (!directory.isReadable()) {
+        qDebug() << "Директория недоступна для чтения:" << QString::fromStdString(PATH_TO_STANDART_TEXT);
+        return;
+    }
+
+    // Устанавливаем фильтр для JSON файлов
+    QStringList filters;
+    filters << "*.json";
+    directory.setNameFilters(filters);
+    directory.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
+
+    // Получаем список всех JSON файлов в директории
+    QFileInfoList fileList = directory.entryInfoList();
+
+    if (fileList.isEmpty()) {
+        qDebug() << "В директории нет JSON файлов:" << QString::fromStdString(PATH_TO_STANDART_TEXT);
+        return;
+    }
+
+    qDebug() << "Найдено JSON файлов:" << fileList.size();
+
+    for (const QFileInfo& fileInfo : fileList) {
+        String filePath = fileInfo.absoluteFilePath().toStdString();
+        qDebug() << "Обрабатывается файл:" << QString::fromStdString(filePath);
+
+        // Проверяем, что файл существует и доступен для чтения
+        if (!fileInfo.exists() || !fileInfo.isReadable()) {
+            qDebug() << "Файл недоступен:" << fileInfo.fileName();
+            continue;
+        }
+
+        // Парсим стандартный текст из файла
+        std::pair<String, Quote> pQuote = JSONParser::parseStandartText(filePath);
+
+        if (!pQuote.second.text.empty()) {
+            // Получаем язык из имени файла (например, "english.json" -> "english")
+            String fileName = fileInfo.baseName().toStdString();
+            standartText[pQuote.first] = pQuote.second.text;
+            qDebug() << "Добавлен стандартный текст для языка:" << QString::fromStdString(fileName);
+        } else {
+            qDebug() << "Не удалось извлечь текст из файла:" << fileInfo.fileName();
+        }
+    }
+
+    qDebug() << "Инициализация стандартных текстов завершена. Загружено языков:" << standartText.size();
+}
 

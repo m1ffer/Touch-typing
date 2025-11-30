@@ -11,6 +11,10 @@
 #include <QFont>
 #include <QTimer>
 #include <QTextCharFormat>
+#include "JSONParser.h"
+#include <map> // ДОБАВИТЬ
+#include <random> // ДОБАВИТЬ для случайных чисел
+#include <vector> // ДОБАВИТЬ
 
 class TypingInput : public QTextEdit
 {
@@ -23,6 +27,9 @@ class TypingInput : public QTextEdit
 
 public:
     explicit TypingInput(QWidget *parent = nullptr);
+
+    // ДОБАВЛЕНО: Метод для генерации текста по настройкам
+    QString makeTextFromSettings(const Settings& settings);
 
     void setTargetText(const QString &text);
     void reset();
@@ -74,6 +81,7 @@ private:
     void ensureCursorVisible();
     void checkCharacter(int position, QChar enteredChar);
     void updateCursorPosition();
+    void initializeStandartText();
 
     QColor m_cursorColor;
     QColor m_correctTextColor;
@@ -97,6 +105,30 @@ private:
     QVector<QPair<qint64, double>> m_accuracyHistory; // время -> точность
     QTimer *m_historyTimer;  // Таймер для записи истории
      qint64 m_finalTimeMs; // ДОБАВИТЬ: финальное время
+    std::map<std::string, std::vector<Quote>> quotes;
+    std::map<std::string, std::vector<Word>> shortWords;
+    std::map<std::string, std::vector<Word>> longWords;
+
+    // ДОБАВЛЕНО: Константы для генерации текста
+                  static const int MIN_WORDS = 15;
+    static const int MAX_WORDS = 30;
+    static const double PUNCTUATION_PROBABILITY;
+    static const double NUMBER_PROBABILITY;
+    static const int MIN_NUMBER = 1;
+    static const int MAX_NUMBER = 999;
+
+    // ДОБАВЛЕНО: Вспомогательные методы для генерации текста
+    QString getRandomWord(const Settings& settings);
+    Quote getRandomQuote(const std::string& language);
+    QString capitalizeWord(const QString& word);
+    QString addPunctuation(const QString& word);
+    QString addNumber(const QString& word);
+
+    // ДОБАВЛЕНО: Генератор случайных чисел
+    std::random_device m_rd;
+    std::mt19937 m_gen;
+    const std::string PATH_TO_STANDART_TEXT = "../../res/languages/standartText";
+    std::map<String, String> standartText;
 };
 
 #endif // TYPINGINPUT_H

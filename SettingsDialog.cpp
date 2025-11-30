@@ -3,6 +3,11 @@
 #include <QFrame>
 #include <QCloseEvent>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <fstream>
+#include <sstream>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
@@ -12,16 +17,16 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setWindowTitle("Настройки");
     setModal(true);
     setFixedSize(400, 600);
-
     initializeUI();
-    saveInitialStates();  // Сохраняем начальные состояния после инициализации UI
+    loadSettings();
+    saveInitialStates();
 }
 
 void SettingsDialog::closeEvent(QCloseEvent *event)
 {
     // Сохраняем текущие состояния перед сравнением
-    m_currentState.appLanguageId = m_appLanguageGroup->checkedId();
-    m_currentState.trainingLanguageId = m_trainingLanguageGroup->checkedId();
+    m_currentState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
+    m_currentState.trainingLanguage = (m_trainingLanguageGroup->checkedId() == 0) ? "русский" : "english";
     m_currentState.shortWords = m_shortWordsToggle->isChecked();
     m_currentState.longWords = m_longWordsToggle->isChecked();
     m_currentState.punctuation = m_punctuationToggle->isChecked();
@@ -30,18 +35,77 @@ void SettingsDialog::closeEvent(QCloseEvent *event)
     m_currentState.highlight = m_highlightToggle->isChecked();
     m_currentState.keyboard = m_keyboardToggle->isChecked();
 
-    // Сравниваем состояния
     compareStates();
+    saveSettings();
 
-    qDebug() << "Окно настроек закрыто";
+    qDebug() << "Окно настроек закрыто, настройки сохранены";
     event->accept();
+}
+
+void SettingsDialog::loadSettings()
+{
+    const String SETTINGS_FILE_PATH = "tmp/settings.json";
+    Settings settings = JSONParser::parseSettings(SETTINGS_FILE_PATH);
+    applySettings(settings);
+}
+
+void SettingsDialog::applySettings(const Settings& settings)
+{
+    // Устанавливаем язык приложения
+    if (settings.appLanguage == "русский") {
+        m_appRussianRadio->setChecked(true);
+    } else {
+        m_appEnglishRadio->setChecked(true);
+    }
+
+    // Устанавливаем язык обучения
+    if (settings.trainingLanguage == "русский") {
+        m_trainingRussianRadio->setChecked(true);
+    } else {
+        m_trainingEnglishRadio->setChecked(true);
+    }
+
+    // Устанавливаем настройки тренировки
+    m_shortWordsToggle->setChecked(settings.shortWords);
+    m_longWordsToggle->setChecked(settings.longWords);
+    m_punctuationToggle->setChecked(settings.punctuation);
+    m_numbersToggle->setChecked(settings.numbers);
+    m_quotesToggle->setChecked(settings.quotes);
+
+    // Устанавливаем настройки обучения
+    m_highlightToggle->setChecked(settings.highlight);
+    m_keyboardToggle->setChecked(settings.keyboard);
+}
+
+void SettingsDialog::saveSettings()
+{
+    const QString SETTINGS_FILE_PATH = "tmp/settings.json";
+
+    // Создаем директорию, если она не существует
+    QDir dir;
+    if (!dir.exists("tmp")) {
+        if (!dir.mkpath("tmp")) {
+            qDebug() << "Не удалось создать директорию tmp";
+            return;
+        }
+    }
+
+    QFile file(SETTINGS_FILE_PATH);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Не удалось открыть файл настроек для записи";
+        return;
+    }
+
+    QTextStream out(&file);
+    std::string jsonContent = JSONParser::settingsToJSON(m_currentState);
+    out << QString::fromStdString(jsonContent);
+    file.close();
 }
 
 void SettingsDialog::saveInitialStates()
 {
-    // Сохраняем начальные состояния всех переключателей
-    m_initialState.appLanguageId = m_appLanguageGroup->checkedId();
-    m_initialState.trainingLanguageId = m_trainingLanguageGroup->checkedId();
+    m_initialState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
+    m_initialState.trainingLanguage = (m_trainingLanguageGroup->checkedId() == 0) ? "русский" : "english";
     m_initialState.shortWords = m_shortWordsToggle->isChecked();
     m_initialState.longWords = m_longWordsToggle->isChecked();
     m_initialState.punctuation = m_punctuationToggle->isChecked();
@@ -50,7 +114,6 @@ void SettingsDialog::saveInitialStates()
     m_initialState.highlight = m_highlightToggle->isChecked();
     m_initialState.keyboard = m_keyboardToggle->isChecked();
 
-    // Инициализируем текущее состояние как копию начального
     m_currentState = m_initialState;
 }
 
@@ -58,21 +121,14 @@ void SettingsDialog::compareStates()
 {
     qDebug() << "=== СРАВНЕНИЕ НАСТРОЕК ===";
 
-    // Сравниваем язык приложения
-    if (m_initialState.appLanguageId != m_currentState.appLanguageId) {
-        QString from = (m_initialState.appLanguageId == 0) ? "Русский" : "English";
-        QString to = (m_currentState.appLanguageId == 0) ? "Русский" : "English";
-        qDebug() << "Язык приложения изменен:" << from << "->" << to;
+    if (m_initialState.appLanguage != m_currentState.appLanguage) {
+        qDebug() << "Язык приложения изменен:" << QString::fromStdString(m_initialState.appLanguage) << "->" << QString::fromStdString(m_currentState.appLanguage);
     }
 
-    // Сравниваем язык обучения
-    if (m_initialState.trainingLanguageId != m_currentState.trainingLanguageId) {
-        QString from = (m_initialState.trainingLanguageId == 0) ? "Русский" : "Английский";
-        QString to = (m_currentState.trainingLanguageId == 0) ? "Русский" : "Английский";
-        qDebug() << "Язык обучения изменен:" << from << "->" << to;
+    if (m_initialState.trainingLanguage != m_currentState.trainingLanguage) {
+        qDebug() << "Язык обучения изменен:" << QString::fromStdString(m_initialState.trainingLanguage) << "->" << QString::fromStdString(m_currentState.trainingLanguage);
     }
 
-    // Сравниваем настройки тренировки
     if (m_initialState.shortWords != m_currentState.shortWords) {
         qDebug() << "Короткие слова:" << m_initialState.shortWords << "->" << m_currentState.shortWords;
     }
@@ -89,7 +145,6 @@ void SettingsDialog::compareStates()
         qDebug() << "Цитаты:" << m_initialState.quotes << "->" << m_currentState.quotes;
     }
 
-    // Сравниваем настройки обучения
     if (m_initialState.highlight != m_currentState.highlight) {
         qDebug() << "Подсветка:" << m_initialState.highlight << "->" << m_currentState.highlight;
     }

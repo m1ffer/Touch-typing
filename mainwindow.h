@@ -5,10 +5,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QTime>
-#include <map>
-#include <vector>
 #include "SettingsDialog.h"
-#include "JSONParser.h"
 
 namespace Ui {
 class MainWindow;
@@ -47,11 +44,12 @@ private:
     Ui::MainWindow *ui;
     QButtonGroup *modeButtonGroup;
     int m_currentLessonId;
+    QString m_currentMode;
     SettingsDialog *m_settingsDialog;
-    // Три переменные
-    std::map<String, std::vector<Quote>> quotes;
-    std::map<String, std::vector<Word>> shortWords;
-    std::map<String, std::vector<Word>> longWords;
+    // ДОБАВЛЕНО: Метод для обновления текста тренировки
+    void updateTrainingText();
+    // ДОБАВЛЕНО: Текущие настройки
+    Settings m_currentSettings;
 };
 
 #endif // MAINWINDOW_H
