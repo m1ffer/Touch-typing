@@ -64,6 +64,8 @@ public:
     QVector<QPair<qint64, double>> getSpeedHistory() const { return m_speedHistory; }
     QVector<QPair<qint64, double>> getAccuracyHistory() const { return m_accuracyHistory; }
      //QVector<QPair<qint64, double>> getSpeedHistory() const;
+    void setLesson(const unsigned int lessonId, const String& currentLang);
+    void initializeLessons(const std::map<String, std::vector<Lesson>>& mp);
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();
@@ -74,7 +76,17 @@ signals:
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-
+    // ДОБАВЛЕНО: Отключаем контекстное меню
+    void contextMenuEvent(QContextMenuEvent *event) override;
+    // ДОБАВЛЕНО: Запрещаем вставку из буфера обмена
+    bool canInsertFromMimeData(const QMimeData *source) const override;
+    void insertFromMimeData(const QMimeData *source) override;
+    // ДОБАВЛЕНО: Запрещаем копирование в буфер обмена
+    // ДОБАВЛЕНО: Запрещаем изменение выделения
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 private:
     void updateTextColors();
     void updateStyle();
@@ -108,6 +120,7 @@ private:
     std::map<std::string, std::vector<Quote>> quotes;
     std::map<std::string, std::vector<Word>> shortWords;
     std::map<std::string, std::vector<Word>> longWords;
+    std::map<String, std::vector<QString>> lessons;
 
     // ДОБАВЛЕНО: Константы для генерации текста
                   static const int MIN_WORDS = 15;

@@ -80,3 +80,7 @@ void ScrollButtonWidget::onButtonClicked()
         emit buttonClicked(text, data);
     }
 }
+
+ScrollButtonWidget::~ScrollButtonWidget(){
+    delete(m_scrollArea);
+}

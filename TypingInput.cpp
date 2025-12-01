@@ -8,6 +8,10 @@
 #include <QTextStream>
 #include <algorithm> // ДОБАВИТЬ для std::shuffle
 #include <QRegularExpression>
+#include <QContextMenuEvent> // ДОБАВИТЬ для контекстного меню
+#include <QMimeData>        // ДОБАВИТЬ для работы с буфером обмена
+#include <QMouseEvent>      // ДОБАВИТЬ для обработки мыши
+
 
 // ДОБАВЛЕНО: Определение констант
 const double TypingInput::PUNCTUATION_PROBABILITY = 0.3; // 30% вероятность пунктуации
@@ -32,6 +36,19 @@ TypingInput::TypingInput(QWidget *parent)
     setFrameStyle(QFrame::NoFrame);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    // ДОБАВЛЕНО: Отключаем все возможности вставки и копирования
+    setAcceptDrops(false);                     // Отключаем drag-and-drop
+    setTextInteractionFlags(Qt::NoTextInteraction); // Отключаем все взаимодействия с текстом
+    setFocusPolicy(Qt::StrongFocus);           // Только фокус через Tab/клик
+
+    // Но разрешаем ввод с клавиатуры
+    setTextInteractionFlags(textInteractionFlags() | Qt::TextEditable);
+
+    // Убираем возможность выделения текста
+    QTextCursor cursor = textCursor();
+    cursor.clearSelection();
+    setTextCursor(cursor);
 
     // Настройка шрифта
     QFont font("Consolas", 16, QFont::Normal);
@@ -126,12 +143,61 @@ void TypingInput::reset()
     setTargetText(m_targetText);
 }
 
+// ДОБАВЛЕНО: Отключаем контекстное меню
+void TypingInput::contextMenuEvent(QContextMenuEvent *event)
+{
+    // Полностью игнорируем событие контекстного меню
+    event->accept();
+}
+
+// ДОБАВЛЕНО: Запрещаем вставку из буфера обмена
+bool TypingInput::canInsertFromMimeData(const QMimeData *source) const
+{
+    Q_UNUSED(source);
+    return false; // Полностью запрещаем вставку
+}
+
+// ДОБАВЛЕНО: Запрещаем вставку из буфера обмена
+void TypingInput::insertFromMimeData(const QMimeData *source)
+{
+    Q_UNUSED(source);
+    // Ничего не делаем - вставка полностью запрещена
+}
+
+// ДОБАВЛЕНО: Переопределяем keyPressEvent для дополнительных ограничений
 void TypingInput::keyPressEvent(QKeyEvent *event)
 {
-    // Игнорируем клавиши навигации
+    // Блокируем все комбинации клавиш для копирования/вставки
+    if (event->matches(QKeySequence::Copy) ||
+        event->matches(QKeySequence::Cut) ||
+        event->matches(QKeySequence::Paste) ||
+        event->matches(QKeySequence::SelectAll) ||
+        event->key() == Qt::Key_Insert || // Block Insert key
+        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_A) ||
+        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_C) ||
+        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_X) ||
+        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_V) ||
+        (event->modifiers() == Qt::ShiftModifier && event->key() == Qt::Key_Insert)) {
+
+        event->ignore(); // Полностью игнорируем эти комбинации
+        return;
+    }
+
+    // Игнорируем клавиши навигации (уже есть, но оставляем для полноты)
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right ||
         event->key() == Qt::Key_Up || event->key() == Qt::Key_Down ||
-        event->key() == Qt::Key_Home || event->key() == Qt::Key_End) {
+        event->key() == Qt::Key_Home || event->key() == Qt::Key_End ||
+        event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown) {
+        event->ignore();
+        return;
+    }
+
+    // Игнорируем специальные клавиши
+    if (event->key() == Qt::Key_Shift || event->key() == Qt::Key_Control ||
+        event->key() == Qt::Key_Alt || event->key() == Qt::Key_Meta ||
+        event->key() == Qt::Key_AltGr || event->key() == Qt::Key_CapsLock ||
+        event->key() == Qt::Key_NumLock || event->key() == Qt::Key_ScrollLock) {
+        event->ignore();
         return;
     }
 
@@ -155,12 +221,13 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
                 emit textChanged(m_enteredText);
             }
         }
+        event->accept();
         return;
     }
 
-    // Игнорируем специальные клавиши
-    if (event->key() == Qt::Key_Shift || event->key() == Qt::Key_Control ||
-        event->key() == Qt::Key_Alt || event->key() == Qt::Key_Meta) {
+    // Обрабатываем Delete отдельно (запрещаем)
+    if (event->key() == Qt::Key_Delete) {
+        event->ignore();
         return;
     }
 
@@ -197,7 +264,37 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
         }
     }
 
+    event->accept();
     update();
+}
+
+// ДОБАВЛЕНО: Запрещаем выделение мышью
+void TypingInput::mousePressEvent(QMouseEvent *event)
+{
+    // Разрешаем только левую кнопку мыши для фокуса
+    if (event->button() == Qt::LeftButton) {
+        setFocus(); // Только устанавливаем фокус
+        QTextEdit::mousePressEvent(event);
+    }
+    event->ignore(); // Игнорируем все другие действия мышью
+}
+
+// ДОБАВЛЕНО: Запрещаем двойной клик
+void TypingInput::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    event->ignore(); // Полностью игнорируем двойной клик
+}
+
+// ДОБАВЛЕНО: Запрещаем перемещение мыши с зажатой кнопкой
+void TypingInput::mouseMoveEvent(QMouseEvent *event)
+{
+    event->ignore(); // Игнорируем перемещение мыши
+}
+
+// ДОБАВЛЕНО: Запрещаем отпускание кнопки мыши
+void TypingInput::mouseReleaseEvent(QMouseEvent *event)
+{
+    event->ignore(); // Игнорируем отпускание кнопки
 }
 
 void TypingInput::resizeEvent(QResizeEvent *event)
@@ -596,3 +693,15 @@ void TypingInput::initializeStandartText() {
     qDebug() << "Инициализация стандартных текстов завершена. Загружено языков:" << standartText.size();
 }
 
+void TypingInput::setLesson(const unsigned int lessonId, const String& currentLang){
+    setTargetText(lessons[currentLang][lessonId]);
+}
+
+void TypingInput::initializeLessons(const std::map<String, std::vector<Lesson>>& mp){
+    for (const auto& [lang, v] : mp){
+        lessons[lang].resize(v.size());
+        for (int i = 0; i < v.size(); i++){
+            lessons[lang][v.size() - i - 1] = QString::fromStdString(v[i].text);
+        }
+    }
+}

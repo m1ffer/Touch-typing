@@ -14,7 +14,7 @@ class ScrollButtonWidget : public QWidget
 
 public:
     explicit ScrollButtonWidget(QWidget *parent = nullptr);
-
+    ~ScrollButtonWidget();
     void addButton(const QString &text, const QVariant &data = QVariant());
     void addButtons(const QStringList &texts);
     void clearButtons();

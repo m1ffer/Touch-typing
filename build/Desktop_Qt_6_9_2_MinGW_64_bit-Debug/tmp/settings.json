@@ -1,7 +1,7 @@
 {
   "appLanguage": "русский",
-  "trainingLanguage": "english",
-  "shortWords": false,
+  "trainingLanguage": "русский",
+  "shortWords": true,
   "longWords": false,
   "punctuation": false,
   "numbers": false,

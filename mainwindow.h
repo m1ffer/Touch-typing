@@ -5,6 +5,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QTime>
+#include <map>
 #include "SettingsDialog.h"
 
 namespace Ui {
@@ -35,11 +36,13 @@ private slots:
     void onSettingsButtonClicked();
 
 private:
+    const String PATH_TO_LESSONS = "../../res/languages/lessons";
     void applyButtonStyle();
     void initializeLessons();
     void onLessonSelected(const QString &lessonName, const QVariant &data);
     void updateTimerDisplay(qint64 milliseconds);
     void resetTimerDisplay();
+    void initializeLessonMap();
 
     Ui::MainWindow *ui;
     QButtonGroup *modeButtonGroup;
@@ -50,6 +53,7 @@ private:
     void updateTrainingText();
     // ДОБАВЛЕНО: Текущие настройки
     Settings m_currentSettings;
+    std::map<String, QStringList> lessons;
 };
 
 #endif // MAINWINDOW_H

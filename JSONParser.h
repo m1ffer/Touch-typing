@@ -3,12 +3,29 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <map>
 #include <utility>
 #include <QLocale>
 
 using String = std::string;
 using Word = String;
+
+struct Lesson {
+    String text;
+    String name;
+    String language;
+    unsigned int id;
+
+    // Оператор сравнения для сортировки по id (от меньшего к большему)
+    bool operator>(const Lesson& other) const {
+        return id > other.id;
+    }
+
+    bool operator<(const Lesson& other) const {
+        return id < other.id;
+    }
+};
 
 struct Quote {
     String text;
@@ -33,13 +50,14 @@ public:
     static std::map<String, Quote> defaultQuote;
     static std::pair<String, std::vector<Quote>> parseQuotes(String path);
     static std::pair<String, std::vector<Word>> parseWords(String path);
-
+    static Lesson parseLesson(const String& path);  // Добавить эту строку
     // Методы для работы с настройками
     static Settings parseSettings(const std::string& path);
     static std::string settingsToJSON(const Settings& settings);
     static Settings getDefaultSettings();
     static std::string getSystemLanguage();
     static std::pair<String, Quote> parseStandartText(const String& path);
+    static std::map<String, std::priority_queue<Lesson>> parseLessons(const String& path);
 private:
     static String unescapeJSONString(const String& str) {
         String result;

@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <fstream>
 #include <sstream>
+#include "ui_mainwindow.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
@@ -127,6 +128,7 @@ void SettingsDialog::compareStates()
 
     if (m_initialState.trainingLanguage != m_currentState.trainingLanguage) {
         qDebug() << "Язык обучения изменен:" << QString::fromStdString(m_initialState.trainingLanguage) << "->" << QString::fromStdString(m_currentState.trainingLanguage);
+
     }
 
     if (m_initialState.shortWords != m_currentState.shortWords) {

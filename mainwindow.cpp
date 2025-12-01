@@ -6,6 +6,9 @@
 #include <QList>
 #include <QLabel> // ДОБАВЛЕНО
 #include "StatisticsWidget.h"  // ДОБАВИТЬ
+#include <QString>
+#include <QRegularExpression>
+#include "MessageHelper.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -44,10 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(input, &TypingInput::timerStopped, this, &MainWindow::onTypingTimerStopped);
     connect(input, &TypingInput::timerUpdated, this, &MainWindow::onTypingTimerUpdated);
     // Устанавливаем начальную страницу
-    initializeLessons();
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
     m_currentMode = ui -> trainButton-> text();
-
+    initializeLessonMap();
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
@@ -120,9 +122,8 @@ void MainWindow::applyButtonStyle()
 
 void MainWindow::onTrainModeClicked()
 {
-
     qDebug() << "Режим тренировки активирован";
-    if (m_currentMode == ui -> trainButton -> text())
+    if (m_currentMode == ui -> trainButton -> text() && !(ui -> modesStackedWidget -> currentWidget() == ui -> choseMode))
         updateTrainingText();
     else
         switchToTrainingMode();
@@ -132,8 +133,14 @@ void MainWindow::onTrainModeClicked()
 
 void MainWindow::onLearnModeClicked()
 {
-    qDebug() << "Режим обучения активирован";
-    switchToLearningMode();
+    if(lessons[m_currentSettings.trainingLanguage].empty()){
+        qDebug() << "Для текущего языка уроков нет, переключение не произошло";
+        //вывести соо
+    }
+    {
+        qDebug() << "Режим обучения активирован";
+        switchToLearningMode();
+    }
     // Логика для режима обучения
 
 }
@@ -151,43 +158,20 @@ void MainWindow::switchToTrainingMode()
 void MainWindow::switchToLearningMode()
 {
     // Переключаем modesStackedWidget на страницу choseMode
+    initializeLessons();
     ui->modesStackedWidget->setCurrentWidget(ui->choseMode);
     qDebug() << "Переключено на страницу выбора уроков (choseMode)";
 
     // Здесь можно добавить инициализацию списка уроков
-    // initializeLessons();
 }
 
 void MainWindow::initializeLessons()
 {
-    // Здесь можно инициализировать список уроков для ScrollButtonWidget
-    ScrollButtonWidget *lessonWidget = ui->choseWidget; // предполагая, что это ваш ScrollButtonWidget
-
-    if (lessonWidget) {
-        lessonWidget->clearButtons();
-
-        // Добавляем уроки (пример)
-        QStringList lessons = {
-            "Урок 1: Основной ряд",
-            "Урок 2: Верхний ряд",
-            "Урок 3: Нижний ряд",
-            "Урок 4: Цифры",
-            "Урок 5: Символы",
-            "Урок 6: Тренировка скорости",
-            "Урок 7: Тренировка точности",
-            ",t,t,t",
-            "djsf",
-            "sfe",
-            "es",
-            "efsef"
-        };
-
-        lessonWidget->addButtons(lessons);
-
-        // Подключаем обработчик выбора урока
-        connect(lessonWidget, &ScrollButtonWidget::buttonClicked,
-                this, &MainWindow::onLessonSelected);
-    }
+    ScrollButtonWidget *lessonWidget = ui->choseWidget;
+    lessonWidget -> clearButtons();
+    lessonWidget -> addButtons(lessons[m_currentSettings.trainingLanguage]);
+    connect(lessonWidget, &ScrollButtonWidget::buttonClicked,
+            this, &MainWindow::onLessonSelected);
 }
 
 void MainWindow :: onResetButtonClicked(){
@@ -279,21 +263,32 @@ void MainWindow::resetTimerDisplay()
     // saveToFile(lessonId, timeMs, averageTime);
 }*/
 
+int findFirstNum(const QString& str) {
+    QRegularExpression regex("\\d+"); // Регулярное выражение для поиска последовательности цифр
+    QRegularExpressionMatch match = regex.match(str);
+
+    if (match.hasMatch()) {
+        bool ok;
+        int result = match.captured(0).toInt(&ok);
+        if (ok) {
+            return result;
+        }
+    }
+
+    return -1; // Возвращаем -1 если число не найдено
+}
+
 // Модифицируем метод выбора урока
 void MainWindow::onLessonSelected(const QString &text, const QVariant &data)
 {
+    ui->modesStackedWidget->setCurrentWidget(ui -> inputMode);
     m_currentMode = ui -> learnButton -> text();
-    int lessonId = data.toInt();
+    int lessonId = findFirstNum(text);
     m_currentLessonId = lessonId; // ДОБАВЛЕНО: Сохраняем ID текущего урока
 
     qDebug() << "Выбран урок:" << text << "ID:" << lessonId;
-
-    // Сбрасываем таймер при выборе нового урока
+    ui -> typingInput -> setLesson(lessonId - 1, m_currentSettings.trainingLanguage);
     resetTimerDisplay();
-
-    // Переключаемся обратно на страницу тренировки
-    //добавить туда сюда текст
-    ui->modesStackedWidget->setCurrentWidget(ui -> inputMode);
 }
 
 void MainWindow::onCloseChoseButtonClicked(){
@@ -407,7 +402,14 @@ void MainWindow::onStatsNextRequested()
         updateTrainingText();
     }
     else{
-        qDebug() << "Переход к следующему уроку не реализован";
+        if (m_currentLessonId != lessons[m_currentSettings.trainingLanguage].size()){
+            onLessonSelected(QString::fromStdString(std::to_string(m_currentLessonId + 1)), NULL);
+        }
+        else{
+            MessageHelper::showInfo(this, "окак", "больше нету");
+            onResetButtonClicked();
+            onLearnModeClicked();
+        }
     }
 }
 
@@ -440,6 +442,8 @@ void MainWindow::onSettingsButtonClicked()
 
     if (trainingSettingsChanged)
     {
+        if (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage)
+            initializeLessons();
         if (m_currentMode == ui -> trainButton -> text()) {
             qDebug() << "Настройки тренировки изменились, обновляем текст";
             updateTrainingText();
@@ -458,5 +462,22 @@ void MainWindow::updateTrainingText()
     updateTimerDisplay(0);
     qDebug() << "Текст тренировки обновлен по настройкам";
 
+}
+
+void MainWindow::initializeLessonMap(){
+    auto LessonsMap = JSONParser::parseLessons(PATH_TO_LESSONS);
+    std::map<String, std::vector<Lesson>> mp;
+    for (auto [lang, que] : LessonsMap){
+        mp[lang].resize(que.size());
+        for(int i = 0; !que.empty(); i++){
+            mp[lang][i] = que.top();
+            que.pop();
+        }
+        for (int i = 0; i < mp[lang].size(); i++){
+            lessons[lang].push_front(QString::fromStdString(mp[lang][i].name));
+        }
+    }
+    //Тут передать в TypingInput
+    ui -> typingInput -> initializeLessons(mp);
 }
 

@@ -1,5 +1,6 @@
 debug/ControlButton.o
 debug/JSONParser.o
+debug/MessageHelper.o
 debug/ScrollButtonWidget.o
 debug/SettingsDialog.o
 debug/StatisticsWidget.o

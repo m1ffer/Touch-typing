@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <QFile>
+#include <QDir>
 #include <QTextStream>
 
 
@@ -377,4 +378,165 @@ std::pair<String, Quote> JSONParser::parseStandartText(const String& path) {
     }
 
     return {language, quote};
+}
+
+Lesson JSONParser::parseLesson(const String& path) {
+    Lesson lesson;
+
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        qDebug() << "Не удалось открыть файл урока:" << QString::fromStdString(path);
+        return lesson;
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    String content = buffer.str();
+    file.close();
+
+    // Parse language
+    size_t langPos = content.find("\"language\":");
+    if (langPos != String::npos) {
+        size_t startQuote = content.find('"', langPos + 11);
+        if (startQuote != String::npos) {
+            size_t endQuote = findUnescapedQuote(content, startQuote + 1);
+            if (endQuote != String::npos) {
+                String langValue = content.substr(startQuote + 1, endQuote - startQuote - 1);
+                lesson.language = unescapeJSONString(langValue);
+            }
+        }
+    }
+
+    // Parse id
+    size_t idPos = content.find("\"id\":");
+    if (idPos != String::npos) {
+        size_t idStart = idPos + 5;
+        idStart = content.find_first_not_of(" \n\r\t", idStart);
+        if (idStart != String::npos) {
+            if (content[idStart] == '"') {
+                // ID как строка
+                size_t idValueStart = idStart + 1;
+                size_t idEnd = findUnescapedQuote(content, idValueStart);
+                if (idEnd != String::npos) {
+                    String idStr = content.substr(idValueStart, idEnd - idValueStart);
+                    try {
+                        lesson.id = std::stoi(idStr);
+                    } catch (...) {
+                        lesson.id = 0;
+                    }
+                }
+            } else {
+                // ID как число
+                size_t idEnd = content.find_first_not_of("0123456789", idStart);
+                if (idEnd == String::npos) {
+                    idEnd = content.length();
+                }
+                String idStr = content.substr(idStart, idEnd - idStart);
+                try {
+                    lesson.id = std::stoi(idStr);
+                } catch (...) {
+                    lesson.id = 0;
+                }
+            }
+        }
+    }
+
+    // Parse name
+    size_t namePos = content.find("\"name\":");
+    if (namePos != String::npos) {
+        size_t nameStart = content.find('"', namePos + 7);
+        if (nameStart != String::npos) {
+            size_t nameEnd = findUnescapedQuote(content, nameStart + 1);
+            if (nameEnd != String::npos) {
+                String nameValue = content.substr(nameStart + 1, nameEnd - nameStart - 1);
+                lesson.name = unescapeJSONString(nameValue);
+            }
+        }
+    }
+
+    // Parse text
+    size_t textPos = content.find("\"text\":");
+    if (textPos != String::npos) {
+        size_t textStart = content.find('"', textPos + 7);
+        if (textStart != String::npos) {
+            size_t textEnd = findUnescapedQuote(content, textStart + 1);
+            if (textEnd != String::npos) {
+                String textValue = content.substr(textStart + 1, textEnd - textStart - 1);
+                lesson.text = unescapeJSONString(textValue);
+            }
+        }
+    }
+
+    return lesson;
+}
+
+std::map<String, std::priority_queue<Lesson>> JSONParser::parseLessons(const String& path) {
+    std::map<String, std::priority_queue<Lesson>> result;
+
+    QDir directory(QString::fromStdString(path));
+
+    // Проверяем существование директории
+    if (!directory.exists()) {
+        qDebug() << "Директория не существует:" << QString::fromStdString(path);
+        return result;
+    }
+
+    // Проверяем доступность директории для чтения
+    if (!directory.isReadable()) {
+        qDebug() << "Директория недоступна для чтения:" << QString::fromStdString(path);
+        return result;
+    }
+
+    // Устанавливаем фильтр для JSON файлов
+    QStringList filters;
+    filters << "*.json";
+    directory.setNameFilters(filters);
+    directory.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
+
+    // Получаем список всех JSON файлов в директории
+    QFileInfoList fileList = directory.entryInfoList();
+
+    if (fileList.isEmpty()) {
+        qDebug() << "В директории нет JSON файлов:" << QString::fromStdString(path);
+        return result;
+    }
+
+    qDebug() << "Найдено JSON файлов уроков:" << fileList.size();
+
+    for (const QFileInfo& fileInfo : fileList) {
+        String filePath = fileInfo.absoluteFilePath().toStdString();
+        qDebug() << "Обрабатывается файл урока:" << QString::fromStdString(filePath);
+
+        // Проверяем, что файл существует и доступен для чтения
+        if (!fileInfo.exists() || !fileInfo.isReadable()) {
+            qDebug() << "Файл урока недоступен:" << fileInfo.fileName();
+            continue;
+        }
+
+        // Парсим урок из файла
+        Lesson lesson = parseLesson(filePath);
+
+        if (!lesson.language.empty() && !lesson.text.empty()) {
+            // Добавляем урок в priority_queue для соответствующего языка
+            result[lesson.language].push(lesson);
+            qDebug() << "Добавлен урок для языка:" << QString::fromStdString(lesson.language)
+                     << "ID:" << lesson.id;
+        } else {
+            if (lesson.language.empty()) {
+                qDebug() << "Не удалось определить язык в файле урока:" << fileInfo.fileName();
+            }
+            if (lesson.text.empty()) {
+                qDebug() << "Не удалось извлечь текст из файла урока:" << fileInfo.fileName();
+            }
+        }
+    }
+
+    qDebug() << "Парсинг уроков завершен. Загружено языков:" << result.size();
+
+    // Выводим статистику по каждому языку
+    for (const auto& [language, queue] : result) {
+        qDebug() << "Язык" << QString::fromStdString(language) << "количество уроков:" << queue.size();
+    }
+
+    return result;
 }
