@@ -1,4 +1,3 @@
-// MessageHelper.cpp (с разными стилями)
 #include "MessageHelper.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -10,17 +9,17 @@
 
 void MessageHelper::showInfo(QWidget* parent, const QString& title, const QString& text)
 {
-    createAndShowDialog(parent, title, text, "#3498db");
+    createAndShowDialog(parent, title, text, "#ffd700");
 }
 
 void MessageHelper::showWarning(QWidget* parent, const QString& title, const QString& text)
 {
-    createAndShowDialog(parent, title, text, "#f39c12");
+    createAndShowDialog(parent, title, text, "#ffd700");
 }
 
 void MessageHelper::showError(QWidget* parent, const QString& title, const QString& text)
 {
-    createAndShowDialog(parent, title, text, "#e74c3c");
+    createAndShowDialog(parent, title, text, "#ffd700");
 }
 
 void MessageHelper::createAndShowDialog(QWidget* parent, const QString& title,
@@ -30,81 +29,53 @@ void MessageHelper::createAndShowDialog(QWidget* parent, const QString& title,
     dialog.setWindowTitle(title);
     dialog.setModal(true);
 
-    // Стиль с динамическим цветом
-    // В createAndShowDialog обновите styleSheet:
-    QString styleSheet = QString(R"(
-    QDialog {
-        background-color: #1a1a1a;
-        border: 2px solid %1;
-        border-radius: 8px;
-    }
-    QLabel {
-        color: #e6e6e6;
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-        font-size: 13px;
-        padding: 20px;
-    }
-    QPushButton {
-        background-color: %1;
-        color: #ffffff;
-        border: none;
-        border-radius: 0px;
-        padding: 8px 20px;
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-        font-size: 12px;
-        font-weight: 500;
-        min-width: 80px;
-    }
-    QPushButton:hover {
-        background-color: %2;
-    }
-    QPushButton:pressed {
-        background-color: %3;
-    }
-)").arg(color).arg(darkenColor(color)).arg(darkenColor(darkenColor(color)));
+    // Устанавливаем только крестик закрытия
+    dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+    // ЖЕСТКО ЗАКОДИРОВАННЫЙ ЖЕЛТЫЙ ЦВЕТ
+    QString styleSheet = R"(
+        QDialog {
+            background-color: #1a1a1a;
+            border: 2px solid #ffd700;
+            border-radius: 0px;
+        }
+        QLabel {
+            color: #ffd700;  /* ЖЕЛТЫЙ - прямо в коде */
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 18px;
+            padding: 30px;
+        }
+    )";
 
     dialog.setStyleSheet(styleSheet);
 
     // Layout
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-    mainLayout->setContentsMargins(15, 15, 15, 15);
-    mainLayout->setSpacing(15);
+    mainLayout->setContentsMargins(25, 25, 25, 25);
 
-    // Текст
+    // Текст с увеличенным шрифтом
     QLabel *textLabel = new QLabel(text, &dialog);
     textLabel->setWordWrap(true);
     textLabel->setAlignment(Qt::AlignCenter);
-    textLabel->setMinimumWidth(300);
+    textLabel->setMinimumWidth(400);
 
-    // Кнопка
-    QPushButton *okButton = new QPushButton("OK", &dialog);
-    okButton->setFixedSize(80, 30);
-    QObject::connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-
-    // Центрирование кнопки
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(okButton);
-    buttonLayout->addStretch();
+    // Дополнительно увеличим шрифт через QFont
+    QFont font = textLabel->font();
+    font.setPointSize(16);
+    font.setBold(false);
+    textLabel->setFont(font);
 
     mainLayout->addWidget(textLabel);
-    mainLayout->addLayout(buttonLayout);
 
-    // Размер
+    // Размер окна
     QFontMetrics fm(textLabel->font());
     int textWidth = fm.horizontalAdvance(text);
-    int dialogWidth = qMin(qMax(textWidth + 60, 350), 600);
-    dialog.setFixedWidth(dialogWidth);
-    dialog.setFixedHeight(150);
+    int dialogWidth = qMin(qMax(textWidth + 100, 450), 700);
+    int lines = text.count('\n') + 1;
+    int lineHeight = fm.height();
+    int dialogHeight = qMax(lines * lineHeight + 100, 200);
+
+    dialog.setFixedSize(dialogWidth, dialogHeight);
 
     dialog.exec();
-}
-
-QString MessageHelper::darkenColor(const QString& color)
-{
-    // Простая функция для затемнения цвета
-    if (color == "#3498db") return "#2980b9"; // синий
-    if (color == "#f39c12") return "#d68910"; // оранжевый
-    if (color == "#e74c3c") return "#c0392b"; // красный
-    return color;
 }

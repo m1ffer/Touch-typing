@@ -14,7 +14,7 @@ public:
 private:
     static void createAndShowDialog(QWidget* parent, const QString& title,
                                     const QString& text, const QString& color);
-    static QString darkenColor(const QString& color);
+    // УДАЛЕН: static QString darkenColor(const QString& color);
 };
 
 #endif // MESSAGEHELPER_H

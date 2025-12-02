@@ -159,6 +159,7 @@ void MainWindow::applyButtonStyle()
 
 void MainWindow::onTrainModeClicked()
 {
+    MessageHelper::showInfo(this, "aaa", "bbb");
     qDebug() << "Режим тренировки активирован";
     if (m_currentMode == ui -> trainButton -> text() && !(ui -> modesStackedWidget -> currentWidget() == ui -> choseMode))
         updateTrainingText();
