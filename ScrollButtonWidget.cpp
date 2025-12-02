@@ -29,6 +29,7 @@ ScrollButtonWidget::ScrollButtonWidget(QWidget *parent)
     mainLayout->addWidget(m_scrollArea);
 }
 
+// В методе addButton ДОБАВЬТЕ:
 void ScrollButtonWidget::addButton(const QString &text, const QVariant &data)
 {
     QPushButton *button = new QPushButton(text, m_contentWidget);
@@ -36,6 +37,34 @@ void ScrollButtonWidget::addButton(const QString &text, const QVariant &data)
     button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     button->setMinimumHeight(35);
 
+    QString buttonStyle = R"(
+        QPushButton {
+            background-color: #2a2a2a;
+            color: #ffd700;
+            border: 1px solid #3a3a3a;
+            padding: 10px 15px;
+            text-align: left;
+            border-radius: 0px;
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 13px;
+            margin: 2px 0px;
+        }
+        QPushButton:hover {
+            background-color: #3a3a3a;
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        QPushButton:pressed {
+            background-color: #4a4a2a;
+            color: #ffd700;
+        }
+        QPushButton:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+    )";
+
+    button->setStyleSheet(buttonStyle);
     connect(button, &QPushButton::clicked, this, &ScrollButtonWidget::onButtonClicked);
 
     m_contentLayout->addWidget(button);

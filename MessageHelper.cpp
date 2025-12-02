@@ -31,35 +31,37 @@ void MessageHelper::createAndShowDialog(QWidget* parent, const QString& title,
     dialog.setModal(true);
 
     // Стиль с динамическим цветом
-    QString styleSheet = QString(
-                             "QDialog {"
-                             "    background-color: #2a2a2a;"
-                             "    border: 2px solid %1;"
-                             "    border-radius: 8px;"
-                             "}"
-                             "QLabel {"
-                             "    color: #e6e6e6;"
-                             "    font-family: 'Consolas', monospace;"
-                             "    font-size: 12px;"
-                             "    padding: 15px;"
-                             "}"
-                             "QPushButton {"
-                             "    background-color: %1;"
-                             "    color: #ffffff;"
-                             "    border: none;"
-                             "    border-radius: 4px;"
-                             "    padding: 8px 20px;"
-                             "    font-weight: bold;"
-                             "    font-size: 12px;"
-                             "    min-width: 80px;"
-                             "}"
-                             "QPushButton:hover {"
-                             "    background-color: %2;"
-                             "}"
-                             "QPushButton:pressed {"
-                             "    background-color: %3;"
-                             "}"
-                             ).arg(color).arg(darkenColor(color)).arg(darkenColor(darkenColor(color)));
+    // В createAndShowDialog обновите styleSheet:
+    QString styleSheet = QString(R"(
+    QDialog {
+        background-color: #1a1a1a;
+        border: 2px solid %1;
+        border-radius: 8px;
+    }
+    QLabel {
+        color: #e6e6e6;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 13px;
+        padding: 20px;
+    }
+    QPushButton {
+        background-color: %1;
+        color: #ffffff;
+        border: none;
+        border-radius: 0px;
+        padding: 8px 20px;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 12px;
+        font-weight: 500;
+        min-width: 80px;
+    }
+    QPushButton:hover {
+        background-color: %2;
+    }
+    QPushButton:pressed {
+        background-color: %3;
+    }
+)").arg(color).arg(darkenColor(color)).arg(darkenColor(darkenColor(color)));
 
     dialog.setStyleSheet(styleSheet);
 

@@ -23,11 +23,10 @@ public:
     static const int BUTTON_SIZE = 60;
     static const int ICON_SIZE = 24;
     static const int HOVER_ICON_SIZE = 28;
-    static const QColor NORMAL_COLOR;
-    static const QColor HOVER_COLOR;
-    static const QColor PRESSED_COLOR;
-
-    // Переопределяем setIcon для обработки SVG из QIcon
+    static const QColor NORMAL_COLOR;    // Желтый
+    static const QColor HOVER_COLOR;   // Светло-желтый
+    static const QColor PRESSED_COLOR;   // Золотой   // #ffd700 (золотой)
+  // Переопределяем setIcon для обработки SVG из QIcon
     void setIcon(const QIcon &icon);
 
 protected:

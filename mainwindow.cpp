@@ -18,6 +18,22 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settingsDialog(nullptr)
 {
     ui->setupUi(this);
+    ui->centralwidget->setStyleSheet(R"(
+        QWidget {
+            background-color: #1a1a1a;
+        }
+        QLabel {
+            color: #ffd700;
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+        }
+    )");
+
+    // Устанавливаем фон главного окна
+    /*setStyleSheet(R"(
+        QMainWindow {
+            background-color: #1a1a1a;
+        }
+    )");*/
     m_currentMode = ui -> trainButton->text();
     m_settingsDialog = new SettingsDialog(this);
     m_currentSettings = m_settingsDialog->getCurrentSettings();
@@ -39,7 +55,27 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "ОШИБКА: Не все кнопки найдены!";
     }
 
-    setStyleSheet("background-color: #1a1a1a; color: #e6e6e6;");
+    // Используйте полный стиль Monkey Type:
+    setStyleSheet(R"(
+    QMainWindow, QDialog, QWidget {
+        background-color: #1a1a1a;
+        color: #e6e6e6;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+    }
+    QGroupBox {
+        border: 1px solid #3a3a3a;
+        border-radius: 4px;
+        margin-top: 10px;
+        padding-top: 10px;
+        color: #cccccc;
+        font-weight: 500;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 5px 0 5px;
+    }
+)");
 
     TypingInput* input = ui -> typingInput;
     // Подключаем сигналы таймера
@@ -68,30 +104,31 @@ void MainWindow::applyButtonStyle()
     QString monkeyTypeStyle = R"(
         QPushButton {
             font-family: 'Roboto Mono', 'Consolas', monospace;
-            font-size: 12px;
+            font-size: 16px;
             font-weight: 400;
             padding: 8px 16px;
             border: 1px solid #3a3a3a;
             background-color: #2a2a2a;
-            color: #cccccc;
-            border-radius: 0px;
+            color: #ffd700;
+            border-radius: 20px;
             text-transform: none;
             letter-spacing: 0.3px;
-            min-width: 80px;
+            min-width: 100px;
         }
         QPushButton:hover {
-            background-color: #323232;
-            border-color: #4a4a4a;
-            color: #e6e6e6;
+            background-color: #3a3a3a;
+            border-color: #ffd700;
+            color: #ffd700;
         }
         QPushButton:checked {
             background-color: #3a3a3a;
-            color: #ffffff;
-            border-color: #5a5a5a;
+            color: #ffd700;
+            border-color: #ffd700;
             font-weight: 500;
         }
         QPushButton:pressed {
-            background-color: #454545;
+            background-color: #4a4a2a;
+            color: #ffd700;
         }
         QPushButton:focus {
             outline: none;
@@ -104,15 +141,15 @@ void MainWindow::applyButtonStyle()
     // Сегментированный вид
     trainButton->setStyleSheet(trainButton->styleSheet() +
                                " QPushButton {"
-                               "     border-top-left-radius: 3px;"
-                               "     border-bottom-left-radius: 3px;"
+                               "     border-top-left-radius: 0px;"
+                               "     border-bottom-left-radius: 0px;"
                                "     border-right: 1px solid #1a1a1a;"
                                " }");
 
     learnButton->setStyleSheet(learnButton->styleSheet() +
                                " QPushButton {"
-                               "     border-top-right-radius: 3px;"
-                               "     border-bottom-right-radius: 3px;"
+                               "     border-top-right-radius: 0px;"
+                               "     border-bottom-right-radius: 0px;"
                                "     border-left: none;"
                                " }");
 
@@ -136,6 +173,7 @@ void MainWindow::onLearnModeClicked()
     if(lessons[m_currentSettings.trainingLanguage].empty()){
         qDebug() << "Для текущего языка уроков нет, переключение не произошло";
         //вывести соо
+        MessageHelper::showWarning(this, "так бывает", "нету бля уроков для этого языка");
     }
     {
         qDebug() << "Режим обучения активирован";
@@ -418,6 +456,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete modeButtonGroup;
     delete m_settingsDialog;
+    ui ->choseWidget ->clearButtons();
 }
 
 void MainWindow::onSettingsButtonClicked()

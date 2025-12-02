@@ -1,11 +1,11 @@
 {
-  "appLanguage": "русский",
+  "appLanguage": "english",
   "trainingLanguage": "русский",
-  "shortWords": true,
+  "shortWords": false,
   "longWords": false,
   "punctuation": false,
   "numbers": false,
-  "quotes": false,
-  "highlight": true,
-  "keyboard": true
+  "quotes": true,
+  "highlight": false,
+  "keyboard": false
 }

@@ -2,12 +2,11 @@
 #include <QMouseEvent>
 #include <QFileInfo>
 #include <QDir>
-#include <QDebug>
+#include <QDebug>  // #ffd700 (золотой)
 
-// Определение констант
-const QColor ControlButton::NORMAL_COLOR = QColor(100, 100, 100);
-const QColor ControlButton::HOVER_COLOR = QColor(200, 200, 200);
-const QColor ControlButton::PRESSED_COLOR = QColor(50, 150, 250);
+const QColor ControlButton::NORMAL_COLOR = QColor(255, 215, 0);    // Нормальный - желтый
+const QColor ControlButton::HOVER_COLOR = QColor(180, 180, 180);   // При наведении - серый
+const QColor ControlButton::PRESSED_COLOR = QColor(120, 120, 120); // При нажатии - темно-серый
 
 ControlButton::ControlButton(QWidget *parent)
     : QPushButton(parent)

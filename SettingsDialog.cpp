@@ -18,6 +18,51 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setWindowTitle("Настройки");
     setModal(true);
     setFixedSize(400, 600);
+    // После setFixedSize добавьте:
+    // В конструкторе SettingsDialog ДОБАВЬТЕ после setFixedSize:
+    setStyleSheet(R"(
+    SettingsDialog {
+        background-color: #1a1a1a;
+        color: #ffd700;
+    }
+    QRadioButton {
+        color: #ffd700;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 12px;
+        padding: 5px 0px;
+    }
+    QRadioButton::indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 0px;
+        border: 2px solid #ffd700;
+        background-color: #2a2a2a;
+    }
+    QRadioButton::indicator:checked {
+        background-color: #ffd700;
+        border-color: #ffd700;
+    }
+    QLabel {
+        color: #ffd700;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 12px;
+    }
+    QGroupBox {
+        border: 1px solid #3a3a3a;
+        border-radius: 0px;
+        margin-top: 10px;
+        padding-top: 10px;
+        color: #ffd700;
+        font-weight: 500;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 5px 0 5px;
+        color: #ffd700;
+    }
+)");
     initializeUI();
     loadSettings();
     saveInitialStates();

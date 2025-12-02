@@ -159,14 +159,14 @@ public:
 
         timerLabel = new QLabel(inputMode);
         timerLabel->setObjectName("timerLabel");
-        timerLabel->setStyleSheet(QString::fromUtf8("QLabel {\n"
-"    color: #ffffff; \n"
-"    font-size: 16px; \n"
-"    font-family: 'Consolas'; \n"
-"    background-color: #333333; \n"
-"    padding: 5px; \n"
-"    border-radius: 3px;\n"
-"}"));
+        timerLabel->setStyleSheet(QString::fromUtf8("color: #ffd700;\n"
+"    font-size: 16px;\n"
+"    font-family: 'Roboto Mono', 'Consolas', monospace;\n"
+"    background-color: transparent;\n"
+"    padding: 5px;\n"
+"    border: 1px solid #3a3a3a;\n"
+"    border-radius: 0px;\n"
+"    font-weight: 500;"));
 
         gridLayout_17->addWidget(timerLabel, 0, 1, 1, 1);
 

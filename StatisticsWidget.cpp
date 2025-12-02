@@ -92,6 +92,72 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
         QPoint center = parentRect.center();
         move(center - rect().center());
     }
+
+    // В конструкторе StatisticsWidget ДОБАВЬТЕ после setWindowTitle:
+    setStyleSheet(R"(
+    StatisticsWidget {
+        background-color: #1a1a1a;
+    }
+    QLabel {
+        color: #ffd700;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 12px;
+    }
+    QGroupBox {
+        border: 1px solid #3a3a3a;
+        border-radius: 0px;
+        margin-top: 10px;
+        padding-top: 10px;
+        color: #ffd700;
+        font-weight: 500;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 5px 0 5px;
+        color: #ffd700;
+    }
+    QChart {
+        background-color: #1a1a1a;
+    }
+    QChart .axis {
+        color: #ffd700;
+    }
+    QChart .axis-label {
+        color: #ffd700;
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+    }
+)");
+    // ДОБАВЬТЕ стиль для кнопок:
+    QString buttonStyle = R"(
+    QPushButton {
+        font-family: 'Roboto Mono', 'Consolas', monospace;
+        font-size: 12px;
+        font-weight: 400;
+        padding: 8px 16px;
+        border: 1px solid #3a3a3a;
+        background-color: #2a2a2a;
+        color: #ffd700;
+        border-radius: 0px;
+        min-width: 80px;
+    }
+    QPushButton:hover {
+        background-color: #3a3a3a;
+        border-color: #ffd700;
+        color: #ffd700;
+    }
+    QPushButton:pressed {
+        background-color: #4a4a2a;
+        color: #ffd700;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+)";
+
+    m_repeatButton->setStyleSheet(buttonStyle);
+    m_nextButton->setStyleSheet(buttonStyle);
 }
 
 void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory)

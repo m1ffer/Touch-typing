@@ -19,11 +19,11 @@ const double TypingInput::NUMBER_PROBABILITY = 0.2;      // 20% вероятно
 
 TypingInput::TypingInput(QWidget *parent)
     : QTextEdit(parent),
-    m_cursorColor(QColor(255, 255, 0)),
-    m_correctTextColor(QColor(255, 255, 0)),
-    m_incorrectTextColor(QColor(255, 0, 0)),
-    m_pendingTextColor(QColor(128, 128, 128)),
-    m_backgroundColor(QColor(40, 40, 40)),
+    m_cursorColor(QColor(255, 215, 0)),          // Желтый курсор
+    m_correctTextColor(QColor(255, 215, 0)),     // Желтый правильный текст
+    m_incorrectTextColor(QColor(255, 100, 100)), // Светло-красный для ошибок
+    m_pendingTextColor(QColor(255, 215, 0, 150)), // Полупрозрачный желтый
+    m_backgroundColor(QColor(34, 34, 34)), // #222222 - светлее чем #1a1a1a
     m_currentPosition(0),
     m_errorsCount(0),
     m_totalCharsTyped(0),
@@ -51,7 +51,7 @@ TypingInput::TypingInput(QWidget *parent)
     setTextCursor(cursor);
 
     // Настройка шрифта
-    QFont font("Consolas", 16, QFont::Normal);
+    QFont font("Consolas", 22, QFont::Normal);
     font.setStyleHint(QFont::TypeWriter);
     setFont(font);
 
@@ -339,19 +339,41 @@ void TypingInput::updateTextColors()
     setTextCursor(cursor);
 }
 
+// В методе updateStyle() ИЗМЕНИТЕ:
 void TypingInput::updateStyle()
 {
-    setStyleSheet(QString("QTextEdit { "
-                          "background-color: %1; "
-                          "color: %2; "
-                          "border: 2px solid %3; "
-                          "border-radius: 5px; "
-                          "padding: 10px; "
-                          "caret-color: %4; "  // Цвет курсора
-                          "}")
+    setStyleSheet(QString(R"(
+        QTextEdit {
+            background-color: %1;
+            color: %2;
+            border: 2px solid #3a3a3a;
+            border-radius: 0px;
+            padding: 15px;
+            caret-color: %3;
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 24px;
+            line-height: 1.5;
+            selection-background-color: #3a3a3a;
+        }
+        QScrollBar:vertical {
+            background: #2a2a2a;
+            width: 10px;
+            border-radius: 0px;
+        }
+        QScrollBar::handle:vertical {
+            background: #ffd700;
+            border-radius: 0px;
+            min-height: 20px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #ffed4a;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
+        }
+    )")
                       .arg(m_backgroundColor.name())
                       .arg(m_pendingTextColor.name())
-                      .arg(m_pendingTextColor.darker(150).name())
                       .arg(m_cursorColor.name()));
 }
 
