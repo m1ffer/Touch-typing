@@ -38,7 +38,7 @@ private:
     QChartView *m_chartView;
     // Константы для настройки количества делений на осях
     static const int TIME_AXIS_TICKS = 15;    // Количество делений по времени (оси X)
-    static const int SPEED_AXIS_TICKS = 20;    // Количество делений по скорости (оси Y)
+    static const int SPEED_AXIS_TICKS = 10;    // Количество делений по скорости (оси Y)
 };
 
 #endif // STATISTICSWIDGET_H

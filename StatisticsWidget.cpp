@@ -2,7 +2,9 @@
 #include <QDebug>
 #include <QApplication>
 #include <QScreen>
-
+#include <QtCharts/QChart>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QValueAxis>
 
 StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
                                    qint64 timeMs, int errorsCount, int totalChars,
@@ -11,25 +13,82 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     : QWidget(parent)
 {
     setWindowTitle("Результаты тренировки");
-    setMinimumSize(900, 800);
-    resize(950, 850);
+    setMinimumSize(900, 700);
+    resize(950, 750);  // Увеличили высоту
 
     // Устанавливаем модальность и убираем кнопки управления
     setWindowModality(Qt::ApplicationModal);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
+    // ЖЕЛТЫЙ СТИЛЬ ПРИЛОЖЕНИЯ
+    setStyleSheet(R"(
+        StatisticsWidget {
+            background-color: #1a1a1a;
+        }
+        QLabel {
+            color: #ffd700;
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        QGroupBox {
+            border: 1px solid #3a3a3a;
+            border-radius: 0px;
+            margin-top: 10px;
+            padding-top: 10px;
+            color: #ffd700;
+            font-weight: 500;
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 5px 0 5px;
+            color: #ffd700;
+        }
+        QPushButton {
+            font-family: 'Roboto Mono', 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 10px 20px;
+            border: 1px solid #3a3a3a;
+            background-color: #2a2a2a;
+            color: #ffd700;
+            border-radius: 0px;
+            min-width: 120px;
+        }
+        QPushButton:hover {
+            background-color: #404040;
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        QPushButton:pressed {
+            background-color: #505050;
+            color: #ffd700;
+        }
+        QPushButton:focus {
+            outline: none;
+        }
+    )");
+
     // Основной layout
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 20, 20, 20);
+    mainLayout->setSpacing(15);
 
-    // Создаем график если есть данные
+    // Создаем график если есть данные (УВЕЛИЧЕННЫЙ РАЗМЕР)
     if (!speedHistory.isEmpty()) {
         createSpeedChart(speedHistory);
-        mainLayout->addWidget(m_chartView);
+        m_chartView->setMinimumHeight(450);  // Увеличили график
+        m_chartView->setMinimumWidth(850);
+        mainLayout->addWidget(m_chartView, 0, Qt::AlignCenter);
     }
 
     // Группа с статистикой
     QGroupBox *statsGroup = new QGroupBox("Статистика тренировки");
     QFormLayout *formLayout = new QFormLayout(statsGroup);
+    formLayout->setContentsMargins(20, 20, 20, 20);
+    formLayout->setSpacing(12);
 
     // Исправляем отображение времени
     int totalSeconds = timeMs / 1000;
@@ -50,12 +109,18 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     QLabel *errorsLabel = new QLabel(QString::number(errorsCount));
     QLabel *charsTypedLabel = new QLabel(QString::number(totalChars));
 
-    // Делаем основные показатели более заметными
+    // Устанавливаем увеличенный шрифт
     QFont boldFont = speedCpmLabel->font();
-    boldFont.setPointSize(12);
+    boldFont.setPointSize(14);
     boldFont.setBold(true);
     speedCpmLabel->setFont(boldFont);
     accuracyLabel->setFont(boldFont);
+
+    QFont labelFont = timeLabel->font();
+    labelFont.setPointSize(13);
+    timeLabel->setFont(labelFont);
+    errorsLabel->setFont(labelFont);
+    charsTypedLabel->setFont(labelFont);
 
     formLayout->addRow("Время:", timeLabel);
     formLayout->addRow("Точность:", accuracyLabel);
@@ -63,13 +128,13 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     formLayout->addRow("Ошибки:", errorsLabel);
     formLayout->addRow("Символов введено:", charsTypedLabel);
 
-    // Создаем кнопки "Повторить" и "Дальше"
+    // Создаем кнопки
     m_repeatButton = new QPushButton("Повторить", this);
     m_nextButton = new QPushButton("Дальше", this);
 
-    // Увеличим размер кнопок
-    m_repeatButton->setMinimumSize(120, 35);
-    m_nextButton->setMinimumSize(120, 35);
+    // Увеличиваем размер кнопок
+    m_repeatButton->setMinimumSize(140, 45);
+    m_nextButton->setMinimumSize(140, 45);
 
     // Подключаем кнопки к слотам
     connect(m_repeatButton, &QPushButton::clicked, this, &StatisticsWidget::onRepeatClicked);
@@ -79,11 +144,13 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addStretch();
     buttonsLayout->addWidget(m_repeatButton);
+    buttonsLayout->addSpacing(30);
     buttonsLayout->addWidget(m_nextButton);
     buttonsLayout->addStretch();
 
     // Добавляем все в основной layout
     mainLayout->addWidget(statsGroup);
+    mainLayout->addSpacing(20);
     mainLayout->addLayout(buttonsLayout);
 
     // Центрируем окно относительно родителя
@@ -92,94 +159,27 @@ StatisticsWidget::StatisticsWidget(double accuracy, double speedCpm,
         QPoint center = parentRect.center();
         move(center - rect().center());
     }
-
-    // В конструкторе StatisticsWidget ДОБАВЬТЕ после setWindowTitle:
-    setStyleSheet(R"(
-    StatisticsWidget {
-        background-color: #1a1a1a;
-    }
-    QLabel {
-        color: #ffd700;
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-        font-size: 12px;
-    }
-    QGroupBox {
-        border: 1px solid #3a3a3a;
-        border-radius: 0px;
-        margin-top: 10px;
-        padding-top: 10px;
-        color: #ffd700;
-        font-weight: 500;
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-    }
-    QGroupBox::title {
-        subcontrol-origin: margin;
-        left: 10px;
-        padding: 0 5px 0 5px;
-        color: #ffd700;
-    }
-    QChart {
-        background-color: #1a1a1a;
-    }
-    QChart .axis {
-        color: #ffd700;
-    }
-    QChart .axis-label {
-        color: #ffd700;
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-    }
-)");
-    // ДОБАВЬТЕ стиль для кнопок:
-    QString buttonStyle = R"(
-    QPushButton {
-        font-family: 'Roboto Mono', 'Consolas', monospace;
-        font-size: 12px;
-        font-weight: 400;
-        padding: 8px 16px;
-        border: 1px solid #3a3a3a;
-        background-color: #2a2a2a;
-        color: #ffd700;
-        border-radius: 0px;
-        min-width: 80px;
-    }
-    QPushButton:hover {
-        background-color: #3a3a3a;
-        border-color: #ffd700;
-        color: #ffd700;
-    }
-    QPushButton:pressed {
-        background-color: #4a4a2a;
-        color: #ffd700;
-    }
-    QPushButton:focus {
-        outline: none;
-    }
-)";
-
-    m_repeatButton->setStyleSheet(buttonStyle);
-    m_nextButton->setStyleSheet(buttonStyle);
 }
 
 void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& speedHistory)
 {
     // Создаем серию данных для графика
     QLineSeries *series = new QLineSeries();
-    series->setName("Скорость (симв/мин)");
+    series->setName("Изменение скорости");
 
-    // Увеличиваем толщину линии
-    QPen pen = series->pen();
-    pen.setWidth(2);
+    // Устанавливаем ЖЕЛТЫЙ цвет и толстую линию
+    QPen pen(QColor(255, 215, 0));  // ЖЕЛТЫЙ ЦВЕТ
+    pen.setWidth(3);
     series->setPen(pen);
 
     // Простое сглаживание данных (скользящее среднее)
     QVector<QPair<qint64, double>> smoothedHistory;
-    const int windowSize = 3; // Размер окна для сглаживания
+    const int windowSize = 3;
 
     for (int i = 0; i < speedHistory.size(); ++i) {
         double sum = 0;
         int count = 0;
 
-        // Берем окно вокруг текущей точки
         for (int j = qMax(0, i - windowSize); j <= qMin(speedHistory.size() - 1, i + windowSize); ++j) {
             sum += speedHistory[j].second;
             count++;
@@ -189,11 +189,11 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
         smoothedHistory.append(qMakePair(speedHistory[i].first, smoothedValue));
     }
 
-    // Используем сглаженные данные или исходные, если точек мало
+    // Используем сглаженные данные или исходные
     const QVector<QPair<qint64, double>>& dataToUse =
         (speedHistory.size() > 10) ? smoothedHistory : speedHistory;
 
-    // Добавляем точки данных (время в секундах, скорость в CPM)
+    // Добавляем точки данных
     for (const auto& point : dataToUse) {
         double timeInSeconds = point.first / 1000.0;
         series->append(timeInSeconds, point.second);
@@ -205,35 +205,41 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     chart->setTitle("Динамика скорости во время тренировки");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
+    // Устанавливаем темный фон графика
+    chart->setBackgroundBrush(QBrush(QColor(26, 26, 26)));  // #1a1a1a
+
+    // Устанавливаем ЖЕЛТЫЙ цвет заголовка
+    chart->setTitleBrush(QBrush(QColor(255, 215, 0)));
+
     // Увеличиваем размер шрифта заголовка
-    QFont titleFont = chart->titleFont();
-    titleFont.setPointSize(16);
+    QFont titleFont("Roboto Mono, Consolas, monospace", 14);
     titleFont.setBold(true);
     chart->setTitleFont(titleFont);
 
     // Настраиваем ось X (время в секундах)
     QValueAxis *axisX = new QValueAxis();
     axisX->setTitleText("Время (секунды)");
-    axisX->setTitleFont(QFont("Arial", 12, QFont::Bold));
+    axisX->setTitleBrush(QBrush(QColor(255, 215, 0)));  // ЖЕЛТЫЙ
+    axisX->setLabelsBrush(QBrush(QColor(255, 215, 0)));  // ЖЕЛТЫЙ
+
+    QFont axisFont("Roboto Mono, Consolas, monospace", 11);
+    axisX->setTitleFont(axisFont);
+    axisFont.setPointSize(10);
+    axisX->setLabelsFont(axisFont);
 
     if (!speedHistory.isEmpty()) {
         double maxTime = speedHistory.last().first / 1000.0;
         axisX->setRange(0, maxTime);
-
-        // Используем константу для количества делений
-        axisX->setTickCount(TIME_AXIS_TICKS);
-
-        // Форматируем подписи как целые числа для лучшей читаемости
+        axisX->setTickCount(TIME_AXIS_TICKS);  // Используем константу
         axisX->setLabelFormat("%.0f");
     } else {
         axisX->setRange(0, 10);
         axisX->setTickCount(TIME_AXIS_TICKS);
     }
 
-    // Увеличиваем шрифт подписей на оси X
-    QFont axisFont = axisX->labelsFont();
-    axisFont.setPointSize(9);
-    axisX->setLabelsFont(axisFont);
+    // Устанавливаем цвет линий и меток оси X
+    axisX->setLinePenColor(QColor(90, 90, 90));
+    axisX->setGridLineColor(QColor(60, 60, 60));
 
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
@@ -241,7 +247,11 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     // Настраиваем ось Y (скорость в CPM)
     QValueAxis *axisY = new QValueAxis();
     axisY->setTitleText("Скорость (симв/мин)");
-    axisY->setTitleFont(QFont("Arial", 12, QFont::Bold));
+    axisY->setTitleBrush(QBrush(QColor(255, 215, 0)));  // ЖЕЛТЫЙ
+    axisY->setLabelsBrush(QBrush(QColor(255, 215, 0)));  // ЖЕЛТЫЙ
+
+    axisY->setTitleFont(axisFont);
+    axisY->setLabelsFont(axisFont);
 
     // Находим максимальную скорость
     double maxSpeed = 0;
@@ -255,31 +265,30 @@ void StatisticsWidget::createSpeedChart(const QVector<QPair<qint64, double>>& sp
     axisY->setMin(0);
     double upperBound = qMax(maxSpeed * 1.1, 50.0);
     axisY->setMax(upperBound);
-
-    // Используем константу для количества делений
-    axisY->setTickCount(SPEED_AXIS_TICKS);
-
-    // Форматируем подписи как целые числа
+    axisY->setTickCount(SPEED_AXIS_TICKS);  // Используем константу
     axisY->setLabelFormat("%.0f");
 
-    // Увеличиваем шрифт подписей на оси Y
-    axisY->setLabelsFont(axisFont);
+    // Устанавливаем цвет линий и меток оси Y
+    axisY->setLinePenColor(QColor(90, 90, 90));
+    axisY->setGridLineColor(QColor(60, 60, 60));
 
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
-    // Устанавливаем темную тему для графика
-    chart->setTheme(QChart::ChartThemeDark);
-
-    // Улучшаем легенду
+    // Настраиваем легенду
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignBottom);
+    chart->legend()->setLabelColor(QColor(255, 215, 0));  // ЖЕЛТЫЙ
+
+    QFont legendFont("Roboto Mono, Consolas, monospace", 11);
+    chart->legend()->setFont(legendFont);
 
     // Создаем view для графика
     m_chartView = new QChartView(chart);
     m_chartView->setRenderHint(QPainter::Antialiasing);
-    m_chartView->setMinimumHeight(500);
-    m_chartView->setMinimumWidth(800);
+
+    // Устанавливаем фон view в темный
+    m_chartView->setBackgroundBrush(QBrush(QColor(26, 26, 26)));
 }
 
 void StatisticsWidget::onRepeatClicked()
