@@ -12,7 +12,7 @@
 #include "ToggleSwitch.h"
 #include "JSONParser.h"
 
-class SettingsDialog : public QDialog
+              class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
@@ -57,6 +57,8 @@ private:
     QButtonGroup *m_trainingLanguageGroup;
     QRadioButton *m_trainingRussianRadio;
     QRadioButton *m_trainingEnglishRadio;
+    QRadioButton *m_trainingAssemblyRadio;    // Добавлено
+    QRadioButton *m_trainingCppRadio;        // Добавлено
 
     ToggleSwitch *m_shortWordsToggle;
     ToggleSwitch *m_longWordsToggle;

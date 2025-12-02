@@ -159,7 +159,6 @@ void MainWindow::applyButtonStyle()
 
 void MainWindow::onTrainModeClicked()
 {
-    MessageHelper::showInfo(this, "aaa", "bbb");
     qDebug() << "Режим тренировки активирован";
     if (m_currentMode == ui -> trainButton -> text() && !(ui -> modesStackedWidget -> currentWidget() == ui -> choseMode))
         updateTrainingText();
@@ -174,9 +173,9 @@ void MainWindow::onLearnModeClicked()
     if(lessons[m_currentSettings.trainingLanguage].empty()){
         qDebug() << "Для текущего языка уроков нет, переключение не произошло";
         //вывести соо
-        MessageHelper::showWarning(this, "так бывает", "нету бля уроков для этого языка");
+        MessageHelper::showWarning(this, "Предупреждение", "Для выбранного языка нет уроков");
     }
-    {
+    else{
         qDebug() << "Режим обучения активирован";
         switchToLearningMode();
     }
@@ -445,7 +444,7 @@ void MainWindow::onStatsNextRequested()
             onLessonSelected(QString::fromStdString(std::to_string(m_currentLessonId + 1)), NULL);
         }
         else{
-            MessageHelper::showInfo(this, "окак", "больше нету");
+            MessageHelper::showInfo(this, "Поздравляем", "Это был последний урок в этом языке");
             onResetButtonClicked();
             onLearnModeClicked();
         }

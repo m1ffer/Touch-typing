@@ -1,13 +1,15 @@
+
 #include "JSONParser.h"
 #include <fstream>
 #include <sstream>
 #include <QFile>
 #include <QDir>
 #include <QTextStream>
+#include <stack>
+#include <cctype>
 
-
-// Вспомогательная функция для поиска незаэкранированной кавычки
-size_t findUnescapedQuote(const String& str, size_t startPos) {
+              // Вспомогательная функция для поиска незаэкранированной кавычки
+              size_t findUnescapedQuote(const String& str, size_t startPos) {
     for (size_t i = startPos; i < str.length(); i++) {
         if (str[i] == '"') {
             // Проверяем, не является ли кавычка заэкранированной
@@ -29,6 +31,55 @@ size_t findUnescapedQuote(const String& str, size_t startPos) {
     return String::npos;
 }
 
+// Вспомогательная функция для поиска конца JSON объекта/массива
+size_t JSONParser::findMatchingBrace(const String& str, size_t startPos, char openBrace, char closeBrace) {
+    int depth = 1;
+    bool inString = false;
+
+    for (size_t i = startPos + 1; i < str.length(); i++) {
+        char c = str[i];
+
+        if (c == '"') {
+            // Проверяем, не экранирована ли кавычка
+            if (i == 0 || str[i-1] != '\\') {
+                inString = !inString;
+            } else {
+                // Проверяем количество обратных слешей
+                size_t backslashCount = 0;
+                for (size_t j = i-1; j >= 0 && str[j] == '\\'; j--) {
+                    backslashCount++;
+                    if (j == 0) break;
+                }
+                // Если четное количество слешей - кавычка не экранирована
+                if (backslashCount % 2 == 0) {
+                    inString = !inString;
+                }
+            }
+        } else if (!inString) {
+            if (c == openBrace) {
+                depth++;
+            } else if (c == closeBrace) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+    }
+    return String::npos;
+}
+
+// Вспомогательная функция для извлечения строки JSON
+String JSONParser::extractJsonString(const String& str, size_t startPos) {
+    size_t quoteStart = findUnescapedQuote(str, startPos);
+    if (quoteStart == String::npos) return "";
+
+    size_t quoteEnd = findUnescapedQuote(str, quoteStart + 1);
+    if (quoteEnd == String::npos) return "";
+
+    return str.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+}
+
 std::pair<String, std::vector<Quote>> JSONParser::parseQuotes(String path) {
     std::vector<Quote> quotes;
     String language;
@@ -43,79 +94,128 @@ std::pair<String, std::vector<Quote>> JSONParser::parseQuotes(String path) {
     String content = buffer.str();
     file.close();
 
+    // Удаляем пробелы и переносы строк для упрощения парсинга
+    String cleaned;
+    bool inString = false;
+    for (size_t i = 0; i < content.length(); i++) {
+        char c = content[i];
+        if (c == '"') {
+            // Проверяем, не экранирована ли кавычка
+            if (i == 0 || content[i-1] != '\\') {
+                inString = !inString;
+            } else {
+                // Проверяем количество обратных слешей
+                size_t backslashCount = 0;
+                for (size_t j = i-1; j >= 0 && content[j] == '\\'; j--) {
+                    backslashCount++;
+                    if (j == 0) break;
+                }
+                if (backslashCount % 2 == 0) {
+                    inString = !inString;
+                }
+            }
+            cleaned += c;
+        } else if (inString || (!isspace(c) && c != '\n' && c != '\r')) {
+            cleaned += c;
+        }
+    }
+
     // Parse language
-    size_t langPos = content.find("\"language\":");
+    size_t langPos = cleaned.find("\"language\":");
     if (langPos != String::npos) {
-        size_t startQuote = content.find('"', langPos + 11);
-        if (startQuote != String::npos) {
-            size_t endQuote = findUnescapedQuote(content, startQuote + 1);
-            if (endQuote != String::npos) {
-                String langValue = content.substr(startQuote + 1, endQuote - startQuote - 1);
-                language = unescapeJSONString(langValue);
+        size_t langStart = cleaned.find('"', langPos + 11);
+        if (langStart != String::npos) {
+            String langStr = extractJsonString(cleaned, langStart);
+            if (!langStr.empty()) {
+                language = unescapeJSONString(langStr);
             }
         }
     }
 
     // Parse quotes array
-    size_t quotesStart = content.find("\"quotes\":");
+    size_t quotesStart = cleaned.find("\"quotes\":");
     if (quotesStart != String::npos) {
-        size_t arrayStart = content.find('[', quotesStart);
-        size_t arrayEnd = content.find(']', arrayStart);
+        size_t arrayStart = cleaned.find('[', quotesStart);
+        if (arrayStart != String::npos) {
+            size_t arrayEnd = findMatchingBrace(cleaned, arrayStart, '[', ']');
+            if (arrayEnd != String::npos) {
+                String quotesArray = cleaned.substr(arrayStart + 1, arrayEnd - arrayStart - 1);
 
-        if (arrayStart != String::npos && arrayEnd != String::npos) {
-            String quotesArray = content.substr(arrayStart, arrayEnd - arrayStart + 1);
-
-            size_t pos = 0;
-            while (pos < quotesArray.length()) {
-                size_t quoteStart = quotesArray.find('{', pos);
-                if (quoteStart == String::npos) break;
-
-                size_t quoteEnd = quotesArray.find('}', quoteStart);
-                if (quoteEnd == String::npos) break;
-
-                String quoteObj = quotesArray.substr(quoteStart, quoteEnd - quoteStart + 1);
-
-                Quote quote;
-
-                // Parse id
-                size_t idPos = quoteObj.find("\"id\":");
-                if (idPos != String::npos) {
-                    size_t idStart = quoteObj.find_first_of("0123456789", idPos);
-                    size_t idEnd = quoteObj.find_first_not_of("0123456789", idStart);
-                    if (idStart != String::npos) {
-                        String idStr = quoteObj.substr(idStart, idEnd - idStart);
-                        quote.id = std::stoi(idStr);
+                size_t pos = 0;
+                while (pos < quotesArray.length()) {
+                    // Пропускаем запятые и пробелы
+                    while (pos < quotesArray.length() && (quotesArray[pos] == ',' || isspace(quotesArray[pos]))) {
+                        pos++;
                     }
-                }
+                    if (pos >= quotesArray.length()) break;
 
-                // Parse source
-                size_t sourcePos = quoteObj.find("\"source\":");
-                if (sourcePos != String::npos) {
-                    size_t sourceStart = quoteObj.find('"', sourcePos + 9);
-                    if (sourceStart != String::npos) {
-                        size_t sourceEnd = findUnescapedQuote(quoteObj, sourceStart + 1);
-                        if (sourceEnd != String::npos) {
-                            String sourceValue = quoteObj.substr(sourceStart + 1, sourceEnd - sourceStart - 1);
-                            quote.source = unescapeJSONString(sourceValue);
+                    // Находим начало объекта
+                    size_t objStart = quotesArray.find('{', pos);
+                    if (objStart == String::npos) break;
+
+                    // Находим конец объекта
+                    size_t objEnd = findMatchingBrace(quotesArray, objStart, '{', '}');
+                    if (objEnd == String::npos) break;
+
+                    String quoteObj = quotesArray.substr(objStart, objEnd - objStart + 1);
+
+                    Quote quote;
+
+                    // Parse id
+                    size_t idPos = quoteObj.find("\"id\":");
+                    if (idPos != String::npos) {
+                        size_t valueStart = idPos + 5;
+                        // Пропускаем пробелы
+                        while (valueStart < quoteObj.length() && isspace(quoteObj[valueStart])) {
+                            valueStart++;
+                        }
+                        if (valueStart < quoteObj.length()) {
+                            if (quoteObj[valueStart] == '"') {
+                                // ID как строка
+                                String idStr = extractJsonString(quoteObj, valueStart);
+                                try {
+                                    quote.id = std::stoi(idStr);
+                                } catch (...) {
+                                    quote.id = 0;
+                                }
+                            } else {
+                                // ID как число
+                                size_t idEnd = valueStart;
+                                while (idEnd < quoteObj.length() &&
+                                       (isdigit(quoteObj[idEnd]) || quoteObj[idEnd] == '-')) {
+                                    idEnd++;
+                                }
+                                String idStr = quoteObj.substr(valueStart, idEnd - valueStart);
+                                try {
+                                    quote.id = std::stoi(idStr);
+                                } catch (...) {
+                                    quote.id = 0;
+                                }
+                            }
                         }
                     }
-                }
 
-                // Parse text
-                size_t textPos = quoteObj.find("\"text\":");
-                if (textPos != String::npos) {
-                    size_t textStart = quoteObj.find('"', textPos + 7);
-                    if (textStart != String::npos) {
-                        size_t textEnd = findUnescapedQuote(quoteObj, textStart + 1);
-                        if (textEnd != String::npos) {
-                            String textValue = quoteObj.substr(textStart + 1, textEnd - textStart - 1);
-                            quote.text = unescapeJSONString(textValue);
+                    // Parse source
+                    size_t sourcePos = quoteObj.find("\"source\":");
+                    if (sourcePos != String::npos) {
+                        String sourceStr = extractJsonString(quoteObj, sourcePos + 9);
+                        if (!sourceStr.empty()) {
+                            quote.source = unescapeJSONString(sourceStr);
                         }
                     }
-                }
 
-                quotes.push_back(quote);
-                pos = quoteEnd + 1;
+                    // Parse text
+                    size_t textPos = quoteObj.find("\"text\":");
+                    if (textPos != String::npos) {
+                        String textStr = extractJsonString(quoteObj, textPos + 7);
+                        if (!textStr.empty()) {
+                            quote.text = unescapeJSONString(textStr);
+                        }
+                    }
+
+                    quotes.push_back(quote);
+                    pos = objEnd + 1;
+                }
             }
         }
     }
@@ -148,6 +248,7 @@ std::pair<String, std::vector<Word>> JSONParser::parseWords(String path) {
             }
         }
     }
+    qDebug() << language;
 
     // Parse words array
     size_t wordsStart = content.find("\"words\":");
@@ -175,7 +276,7 @@ std::pair<String, std::vector<Word>> JSONParser::parseWords(String path) {
             }
         }
     }
-
+    qDebug() << words.size();
     return {language, words};
 }
 
@@ -195,20 +296,25 @@ Settings JSONParser::parseSettings(const std::string& path) {
     }
     file.close();
 
-    // Простой и надежный парсинг
+    // Простой и надежный парсинг для appLanguage
     if (content.find("\"appLanguage\": \"русский\"") != std::string::npos) {
         settings.appLanguage = "русский";
     } else if (content.find("\"appLanguage\": \"english\"") != std::string::npos) {
         settings.appLanguage = "english";
     }
 
+    // Простой и надежный парсинг для trainingLanguage
     if (content.find("\"trainingLanguage\": \"русский\"") != std::string::npos) {
         settings.trainingLanguage = "русский";
     } else if (content.find("\"trainingLanguage\": \"english\"") != std::string::npos) {
         settings.trainingLanguage = "english";
+    } else if (content.find("\"trainingLanguage\": \"assembly\"") != std::string::npos) {
+        settings.trainingLanguage = "assembly";
+    } else if (content.find("\"trainingLanguage\": \"c++\"") != std::string::npos) {
+        settings.trainingLanguage = "c++";
     }
 
-    // Парсим boolean значения - ищем полные строки с ключами
+    // Парсим boolean значения
     settings.shortWords = (content.find("\"shortWords\": true") != std::string::npos);
     settings.longWords = (content.find("\"longWords\": true") != std::string::npos);
     settings.punctuation = (content.find("\"punctuation\": true") != std::string::npos);
@@ -216,7 +322,18 @@ Settings JSONParser::parseSettings(const std::string& path) {
     settings.quotes = (content.find("\"quotes\": true") != std::string::npos);
     settings.highlight = (content.find("\"highlight\": true") != std::string::npos);
     settings.keyboard = (content.find("\"keyboard\": true") != std::string::npos);
-    qDebug() << settings.shortWords << '\n' << settings.longWords << '\n' << settings.punctuation << '\n' << settings.numbers << '\n' << settings.quotes << settings.highlight << '\n' << settings.keyboard;
+
+    qDebug() << "Загружены настройки:";
+    qDebug() << "  appLanguage:" << QString::fromStdString(settings.appLanguage);
+    qDebug() << "  trainingLanguage:" << QString::fromStdString(settings.trainingLanguage);
+    qDebug() << "  shortWords:" << settings.shortWords;
+    qDebug() << "  longWords:" << settings.longWords;
+    qDebug() << "  punctuation:" << settings.punctuation;
+    qDebug() << "  numbers:" << settings.numbers;
+    qDebug() << "  quotes:" << settings.quotes;
+    qDebug() << "  highlight:" << settings.highlight;
+    qDebug() << "  keyboard:" << settings.keyboard;
+
     return settings;
 }
 
@@ -280,98 +397,99 @@ std::pair<String, Quote> JSONParser::parseStandartText(const String& path) {
     String content = buffer.str();
     file.close();
 
-    // Проверяем, что файл не пустой
-    if (content.empty()) {
-        qDebug() << "Файл пустой:" << QString::fromStdString(path);
-        return {language, quote};
+    // Упрощаем парсинг: удаляем пробелы и переносы строк
+    String cleaned;
+    bool inString = false;
+    for (size_t i = 0; i < content.length(); i++) {
+        char c = content[i];
+        if (c == '"') {
+            // Проверяем, не экранирована ли кавычка
+            if (i == 0 || content[i-1] != '\\') {
+                inString = !inString;
+            } else {
+                size_t backslashCount = 0;
+                for (size_t j = i-1; j >= 0 && content[j] == '\\'; j--) {
+                    backslashCount++;
+                    if (j == 0) break;
+                }
+                if (backslashCount % 2 == 0) {
+                    inString = !inString;
+                }
+            }
+            cleaned += c;
+        } else if (inString || (!isspace(c) && c != '\n' && c != '\r')) {
+            cleaned += c;
+        }
     }
 
     // Parse language
-    size_t langPos = content.find("\"language\":");
+    size_t langPos = cleaned.find("\"language\":");
     if (langPos != String::npos) {
-        size_t startQuote = content.find('"', langPos + 11);
-        if (startQuote != String::npos) {
-            size_t endQuote = findUnescapedQuote(content, startQuote + 1);
-            if (endQuote != String::npos) {
-                String langValue = content.substr(startQuote + 1, endQuote - startQuote - 1);
-                language = unescapeJSONString(langValue);
+        size_t langStart = cleaned.find('"', langPos + 11);
+        if (langStart != String::npos) {
+            String langStr = extractJsonString(cleaned, langStart);
+            if (!langStr.empty()) {
+                language = unescapeJSONString(langStr);
             }
         }
     }
 
     // Parse quote object
-    size_t quoteStart = content.find("\"quote\":");
-    if (quoteStart == String::npos) {
-        qDebug() << "Не найдено поле 'quote' в файле:" << QString::fromStdString(path);
-        return {language, quote};
-    }
+    size_t quoteStart = cleaned.find("\"quote\":");
+    if (quoteStart != String::npos) {
+        size_t objStart = cleaned.find('{', quoteStart);
+        if (objStart != String::npos) {
+            size_t objEnd = findMatchingBrace(cleaned, objStart, '{', '}');
+            if (objEnd != String::npos) {
+                String quoteObj = cleaned.substr(objStart, objEnd - objStart + 1);
 
-    size_t objStart = content.find('{', quoteStart);
-    size_t objEnd = content.find('}', objStart);
-
-    if (objStart == String::npos || objEnd == String::npos) {
-        qDebug() << "Не удалось найти объект quote в файле:" << QString::fromStdString(path);
-        return {language, quote};
-    }
-
-    String quoteObj = content.substr(objStart, objEnd - objStart + 1);
-
-    // Parse text
-    size_t textPos = quoteObj.find("\"text\":");
-    if (textPos != String::npos) {
-        size_t textStart = quoteObj.find('"', textPos + 7);
-        if (textStart != String::npos) {
-            size_t textEnd = findUnescapedQuote(quoteObj, textStart + 1);
-            if (textEnd != String::npos) {
-                String textValue = quoteObj.substr(textStart + 1, textEnd - textStart - 1);
-                quote.text = unescapeJSONString(textValue);
-            }
-        }
-    }
-
-    // Parse source
-    size_t sourcePos = quoteObj.find("\"source\":");
-    if (sourcePos != String::npos) {
-        size_t sourceStart = sourcePos + 9;
-        sourceStart = quoteObj.find('"', sourceStart);
-        if (sourceStart != String::npos) {
-            size_t sourceEnd = findUnescapedQuote(quoteObj, sourceStart + 1);
-            if (sourceEnd != String::npos) {
-                String sourceValue = quoteObj.substr(sourceStart + 1, sourceEnd - sourceStart - 1);
-                quote.source = unescapeJSONString(sourceValue);
-            }
-        }
-    }
-
-    // Parse id
-    size_t idPos = quoteObj.find("\"id\":");
-    if (idPos != String::npos) {
-        size_t idStart = idPos + 5;
-        idStart = quoteObj.find_first_not_of(" \n\r\t", idStart);
-        if (idStart != String::npos) {
-            if (quoteObj[idStart] == '"') {
-                // ID как строка
-                size_t idValueStart = idStart + 1;
-                size_t idEnd = findUnescapedQuote(quoteObj, idValueStart);
-                if (idEnd != String::npos) {
-                    String idStr = quoteObj.substr(idValueStart, idEnd - idValueStart);
-                    try {
-                        quote.id = std::stoi(idStr);
-                    } catch (...) {
-                        quote.id = 0;
+                // Parse id
+                size_t idPos = quoteObj.find("\"id\":");
+                if (idPos != String::npos) {
+                    size_t valueStart = idPos + 5;
+                    while (valueStart < quoteObj.length() && isspace(quoteObj[valueStart])) {
+                        valueStart++;
+                    }
+                    if (valueStart < quoteObj.length()) {
+                        if (quoteObj[valueStart] == '"') {
+                            String idStr = extractJsonString(quoteObj, valueStart);
+                            try {
+                                quote.id = std::stoi(idStr);
+                            } catch (...) {
+                                quote.id = 0;
+                            }
+                        } else {
+                            size_t idEnd = valueStart;
+                            while (idEnd < quoteObj.length() &&
+                                   (isdigit(quoteObj[idEnd]) || quoteObj[idEnd] == '-')) {
+                                idEnd++;
+                            }
+                            String idStr = quoteObj.substr(valueStart, idEnd - valueStart);
+                            try {
+                                quote.id = std::stoi(idStr);
+                            } catch (...) {
+                                quote.id = 0;
+                            }
+                        }
                     }
                 }
-            } else {
-                // ID как число
-                size_t idEnd = quoteObj.find_first_not_of("0123456789", idStart);
-                if (idEnd == String::npos) {
-                    idEnd = quoteObj.length();
+
+                // Parse source
+                size_t sourcePos = quoteObj.find("\"source\":");
+                if (sourcePos != String::npos) {
+                    String sourceStr = extractJsonString(quoteObj, sourcePos + 9);
+                    if (!sourceStr.empty()) {
+                        quote.source = unescapeJSONString(sourceStr);
+                    }
                 }
-                String idStr = quoteObj.substr(idStart, idEnd - idStart);
-                try {
-                    quote.id = std::stoi(idStr);
-                } catch (...) {
-                    quote.id = 0;
+
+                // Parse text
+                size_t textPos = quoteObj.find("\"text\":");
+                if (textPos != String::npos) {
+                    String textStr = extractJsonString(quoteObj, textPos + 7);
+                    if (!textStr.empty()) {
+                        quote.text = unescapeJSONString(textStr);
+                    }
                 }
             }
         }
@@ -394,44 +512,64 @@ Lesson JSONParser::parseLesson(const String& path) {
     String content = buffer.str();
     file.close();
 
+    // Упрощаем парсинг
+    String cleaned;
+    bool inString = false;
+    for (size_t i = 0; i < content.length(); i++) {
+        char c = content[i];
+        if (c == '"') {
+            if (i == 0 || content[i-1] != '\\') {
+                inString = !inString;
+            } else {
+                size_t backslashCount = 0;
+                for (size_t j = i-1; j >= 0 && content[j] == '\\'; j--) {
+                    backslashCount++;
+                    if (j == 0) break;
+                }
+                if (backslashCount % 2 == 0) {
+                    inString = !inString;
+                }
+            }
+            cleaned += c;
+        } else if (inString || (!isspace(c) && c != '\n' && c != '\r')) {
+            cleaned += c;
+        }
+    }
+
     // Parse language
-    size_t langPos = content.find("\"language\":");
+    size_t langPos = cleaned.find("\"language\":");
     if (langPos != String::npos) {
-        size_t startQuote = content.find('"', langPos + 11);
-        if (startQuote != String::npos) {
-            size_t endQuote = findUnescapedQuote(content, startQuote + 1);
-            if (endQuote != String::npos) {
-                String langValue = content.substr(startQuote + 1, endQuote - startQuote - 1);
-                lesson.language = unescapeJSONString(langValue);
+        size_t langStart = cleaned.find('"', langPos + 11);
+        if (langStart != String::npos) {
+            String langStr = extractJsonString(cleaned, langStart);
+            if (!langStr.empty()) {
+                lesson.language = unescapeJSONString(langStr);
             }
         }
     }
 
     // Parse id
-    size_t idPos = content.find("\"id\":");
+    size_t idPos = cleaned.find("\"id\":");
     if (idPos != String::npos) {
-        size_t idStart = idPos + 5;
-        idStart = content.find_first_not_of(" \n\r\t", idStart);
-        if (idStart != String::npos) {
-            if (content[idStart] == '"') {
-                // ID как строка
-                size_t idValueStart = idStart + 1;
-                size_t idEnd = findUnescapedQuote(content, idValueStart);
-                if (idEnd != String::npos) {
-                    String idStr = content.substr(idValueStart, idEnd - idValueStart);
-                    try {
-                        lesson.id = std::stoi(idStr);
-                    } catch (...) {
-                        lesson.id = 0;
-                    }
+        size_t valueStart = idPos + 5;
+        while (valueStart < cleaned.length() && isspace(cleaned[valueStart])) {
+            valueStart++;
+        }
+        if (valueStart < cleaned.length()) {
+            if (cleaned[valueStart] == '"') {
+                String idStr = extractJsonString(cleaned, valueStart);
+                try {
+                    lesson.id = std::stoi(idStr);
+                } catch (...) {
+                    lesson.id = 0;
                 }
             } else {
-                // ID как число
-                size_t idEnd = content.find_first_not_of("0123456789", idStart);
-                if (idEnd == String::npos) {
-                    idEnd = content.length();
+                size_t idEnd = valueStart;
+                while (idEnd < cleaned.length() &&
+                       (isdigit(cleaned[idEnd]) || cleaned[idEnd] == '-')) {
+                    idEnd++;
                 }
-                String idStr = content.substr(idStart, idEnd - idStart);
+                String idStr = cleaned.substr(valueStart, idEnd - valueStart);
                 try {
                     lesson.id = std::stoi(idStr);
                 } catch (...) {
@@ -442,28 +580,20 @@ Lesson JSONParser::parseLesson(const String& path) {
     }
 
     // Parse name
-    size_t namePos = content.find("\"name\":");
+    size_t namePos = cleaned.find("\"name\":");
     if (namePos != String::npos) {
-        size_t nameStart = content.find('"', namePos + 7);
-        if (nameStart != String::npos) {
-            size_t nameEnd = findUnescapedQuote(content, nameStart + 1);
-            if (nameEnd != String::npos) {
-                String nameValue = content.substr(nameStart + 1, nameEnd - nameStart - 1);
-                lesson.name = unescapeJSONString(nameValue);
-            }
+        String nameStr = extractJsonString(cleaned, namePos + 7);
+        if (!nameStr.empty()) {
+            lesson.name = unescapeJSONString(nameStr);
         }
     }
 
     // Parse text
-    size_t textPos = content.find("\"text\":");
+    size_t textPos = cleaned.find("\"text\":");
     if (textPos != String::npos) {
-        size_t textStart = content.find('"', textPos + 7);
-        if (textStart != String::npos) {
-            size_t textEnd = findUnescapedQuote(content, textStart + 1);
-            if (textEnd != String::npos) {
-                String textValue = content.substr(textStart + 1, textEnd - textStart - 1);
-                lesson.text = unescapeJSONString(textValue);
-            }
+        String textStr = extractJsonString(cleaned, textPos + 7);
+        if (!textStr.empty()) {
+            lesson.text = unescapeJSONString(textStr);
         }
     }
 
@@ -475,25 +605,21 @@ std::map<String, std::priority_queue<Lesson>> JSONParser::parseLessons(const Str
 
     QDir directory(QString::fromStdString(path));
 
-    // Проверяем существование директории
     if (!directory.exists()) {
         qDebug() << "Директория не существует:" << QString::fromStdString(path);
         return result;
     }
 
-    // Проверяем доступность директории для чтения
     if (!directory.isReadable()) {
         qDebug() << "Директория недоступна для чтения:" << QString::fromStdString(path);
         return result;
     }
 
-    // Устанавливаем фильтр для JSON файлов
     QStringList filters;
     filters << "*.json";
     directory.setNameFilters(filters);
     directory.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::Readable);
 
-    // Получаем список всех JSON файлов в директории
     QFileInfoList fileList = directory.entryInfoList();
 
     if (fileList.isEmpty()) {
@@ -507,17 +633,14 @@ std::map<String, std::priority_queue<Lesson>> JSONParser::parseLessons(const Str
         String filePath = fileInfo.absoluteFilePath().toStdString();
         qDebug() << "Обрабатывается файл урока:" << QString::fromStdString(filePath);
 
-        // Проверяем, что файл существует и доступен для чтения
         if (!fileInfo.exists() || !fileInfo.isReadable()) {
             qDebug() << "Файл урока недоступен:" << fileInfo.fileName();
             continue;
         }
 
-        // Парсим урок из файла
         Lesson lesson = parseLesson(filePath);
 
         if (!lesson.language.empty() && !lesson.text.empty()) {
-            // Добавляем урок в priority_queue для соответствующего языка
             result[lesson.language].push(lesson);
             qDebug() << "Добавлен урок для языка:" << QString::fromStdString(lesson.language)
                      << "ID:" << lesson.id;
@@ -533,7 +656,6 @@ std::map<String, std::priority_queue<Lesson>> JSONParser::parseLessons(const Str
 
     qDebug() << "Парсинг уроков завершен. Загружено языков:" << result.size();
 
-    // Выводим статистику по каждому языку
     for (const auto& [language, queue] : result) {
         qDebug() << "Язык" << QString::fromStdString(language) << "количество уроков:" << queue.size();
     }

@@ -1,10 +1,10 @@
 {
   "appLanguage": "русский",
-  "trainingLanguage": "русский",
-  "shortWords": false,
-  "longWords": false,
-  "punctuation": false,
-  "numbers": false,
+  "trainingLanguage": "assembly",
+  "shortWords": true,
+  "longWords": true,
+  "punctuation": true,
+  "numbers": true,
   "quotes": false,
   "highlight": false,
   "keyboard": false

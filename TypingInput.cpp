@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QStringList>
 #include <QTextStream>
+#include "MessageHelper.h"
 #include <algorithm> // ДОБАВИТЬ для std::shuffle
 #include <QRegularExpression>
 #include <QContextMenuEvent> // ДОБАВИТЬ для контекстного меню
@@ -80,26 +81,44 @@ TypingInput::TypingInput(QWidget *parent)
     });
 
     // ДОБАВЛЕНО: Загрузка данных из JSON файлов
-    // Русские файлы
-    auto ruQuotes = JSONParser::parseQuotes("../../res/languages/russian/quotes.json");
-    quotes[ruQuotes.first] = ruQuotes.second;
+    // Русские цитаты
+    auto Quotes = JSONParser::parseQuotes("../../res/languages/russian/quotes.json");
+    quotes[Quotes.first] = Quotes.second;
+    // Английские цитаты
+    Quotes = JSONParser::parseQuotes("../../res/languages/english/quotes.json");
+    quotes[Quotes.first] = Quotes.second;
+    //С++ куски кода
+    Quotes = JSONParser::parseQuotes("../../res/languages/c++/quotes.json");
+    quotes[Quotes.first] = Quotes.second;
+    //asm куски кода
+    Quotes = JSONParser::parseQuotes("../../res/languages/asm/quotes.json");
+    quotes[Quotes.first] = Quotes.second;
 
-    auto ruShortWords = JSONParser::parseWords("../../res/languages/russian/shortWords.json");
-    shortWords[ruShortWords.first] = ruShortWords.second;
+    //Русские короткие слова
+    auto ShortWords = JSONParser::parseWords("../../res/languages/russian/shortWords.json");
+    shortWords[ShortWords.first] = ShortWords.second;
+    //Английские короткие слова
+    ShortWords = JSONParser::parseWords("../../res/languages/english/shortWords.json");
+    shortWords[ShortWords.first] = ShortWords.second;
+    //С++ короткие слова
+    ShortWords = JSONParser::parseWords("../../res/languages/c++/shortWords.json");
+    shortWords[ShortWords.first] = ShortWords.second;
+    //asm короткие слова
+    ShortWords = JSONParser::parseWords("../../res/languages/asm/shortWords.json");
+    shortWords[ShortWords.first] = ShortWords.second;
 
-    auto ruLongWords = JSONParser::parseWords("../../res/languages/russian/longWords.json");
-    longWords[ruLongWords.first] = ruLongWords.second;
-
-    // Английские файлы
-    auto enQuotes = JSONParser::parseQuotes("../../res/languages/english/quotes.json");
-    quotes[enQuotes.first] = enQuotes.second;
-
-    auto enShortWords = JSONParser::parseWords("../../res/languages/english/shortWords.json");
-    shortWords[enShortWords.first] = enShortWords.second;
-
-    auto enLongWords = JSONParser::parseWords("../../res/languages/english/longWords.json");
-    longWords[enLongWords.first] = enLongWords.second;
-
+    //Русские длинные слова
+    auto LongWords = JSONParser::parseWords("../../res/languages/russian/longWords.json");
+    longWords[LongWords.first] = LongWords.second;
+    //Английские длинные слова
+    LongWords = JSONParser::parseWords("../../res/languages/english/longWords.json");
+    longWords[LongWords.first] = LongWords.second;
+    //c++ короткие слова
+    LongWords = JSONParser::parseWords("../../res/languages/c++/longWords.json");
+    longWords[LongWords.first] = LongWords.second;
+    //asm длинные слова
+    LongWords = JSONParser::parseWords("../../res/languages/asm/longWords.json");
+    longWords[LongWords.first] = LongWords.second;
     // Начальные настройки
     updateStyle();
 }
@@ -735,7 +754,12 @@ void TypingInput::initializeStandartText() {
 }
 
 void TypingInput::setLesson(const unsigned int lessonId, const String& currentLang){
-    setTargetText(lessons[currentLang][lessonId]);
+    if (lessons[currentLang].empty()){
+        MessageHelper::showError(this, "Ошибка", "Для выбранного языка нет уроков");
+        reset();
+    }
+    else
+        setTargetText(lessons[currentLang][lessonId]);
 }
 
 void TypingInput::initializeLessons(const std::map<String, std::vector<Lesson>>& mp){

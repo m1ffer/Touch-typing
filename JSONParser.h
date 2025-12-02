@@ -8,7 +8,7 @@
 #include <utility>
 #include <QLocale>
 
-using String = std::string;
+              using String = std::string;
 using Word = String;
 
 struct Lesson {
@@ -35,7 +35,7 @@ struct Quote {
 
 struct Settings {
     std::string appLanguage;        // "русский" или "english"
-    std::string trainingLanguage;   // "русский" или "english"
+    std::string trainingLanguage;   // "русский", "english", "assembly" или "cpp"
     bool shortWords;
     bool longWords;
     bool punctuation;
@@ -50,7 +50,7 @@ public:
     static std::map<String, Quote> defaultQuote;
     static std::pair<String, std::vector<Quote>> parseQuotes(String path);
     static std::pair<String, std::vector<Word>> parseWords(String path);
-    static Lesson parseLesson(const String& path);  // Добавить эту строку
+    static Lesson parseLesson(const String& path);
     // Методы для работы с настройками
     static Settings parseSettings(const std::string& path);
     static std::string settingsToJSON(const Settings& settings);
@@ -82,6 +82,10 @@ private:
         }
         return result;
     }
+
+    // Вспомогательные функции для корректного парсинга
+    static size_t findMatchingBrace(const String& str, size_t startPos, char openBrace, char closeBrace);
+    static String extractJsonString(const String& str, size_t startPos);
 };
 
-#endif // JSONPARSER_H
+#endif // JSONPARSER

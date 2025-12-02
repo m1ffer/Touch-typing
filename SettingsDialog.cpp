@@ -10,16 +10,16 @@
 #include <sstream>
 #include "ui_mainwindow.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent)
+              SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
-    , m_appLanguageGroup(nullptr)
-    , m_trainingLanguageGroup(nullptr)
+, m_appLanguageGroup(nullptr)
+, m_trainingLanguageGroup(nullptr)
+, m_trainingAssemblyRadio(nullptr)    // Инициализация
+, m_trainingCppRadio(nullptr)        // Инициализация
 {
     setWindowTitle("Настройки");
     setModal(true);
-    setFixedSize(400, 600);
-    // После setFixedSize добавьте:
-    // В конструкторе SettingsDialog ДОБАВЬТЕ после setFixedSize:
+    setFixedSize(400, 650); // Увеличили высоту для новых кнопок
     setStyleSheet(R"(
     SettingsDialog {
         background-color: #1a1a1a;
@@ -71,8 +71,15 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 void SettingsDialog::closeEvent(QCloseEvent *event)
 {
     // Сохраняем текущие состояния перед сравнением
+    int trainingLangId = m_trainingLanguageGroup->checkedId();
+    switch(trainingLangId) {
+    case 0: m_currentState.trainingLanguage = "русский"; break;
+    case 1: m_currentState.trainingLanguage = "english"; break;
+    case 2: m_currentState.trainingLanguage = "assembly"; break; // Добавлено
+    case 3: m_currentState.trainingLanguage = "c++"; break;     // Добавлено
+    }
+
     m_currentState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
-    m_currentState.trainingLanguage = (m_trainingLanguageGroup->checkedId() == 0) ? "русский" : "english";
     m_currentState.shortWords = m_shortWordsToggle->isChecked();
     m_currentState.longWords = m_longWordsToggle->isChecked();
     m_currentState.punctuation = m_punctuationToggle->isChecked();
@@ -97,6 +104,7 @@ void SettingsDialog::loadSettings()
 
 void SettingsDialog::applySettings(const Settings& settings)
 {
+    qDebug() << "bbb\n";
     // Устанавливаем язык приложения
     if (settings.appLanguage == "русский") {
         m_appRussianRadio->setChecked(true);
@@ -105,10 +113,19 @@ void SettingsDialog::applySettings(const Settings& settings)
     }
 
     // Устанавливаем язык обучения
+    qDebug() << settings.trainingLanguage << '\n';
     if (settings.trainingLanguage == "русский") {
         m_trainingRussianRadio->setChecked(true);
-    } else {
+        qDebug() << "AAA";
+    } else if (settings.trainingLanguage == "english") {
         m_trainingEnglishRadio->setChecked(true);
+        qDebug() << "AAA";
+    } else if (settings.trainingLanguage == "assembly") {
+            m_trainingAssemblyRadio->setChecked(true);
+        qDebug() << "AAA";
+    } else if (settings.trainingLanguage == "c++" ) {
+            m_trainingCppRadio->setChecked(true);
+        qDebug() << "AAA";
     }
 
     // Устанавливаем настройки тренировки
@@ -150,8 +167,15 @@ void SettingsDialog::saveSettings()
 
 void SettingsDialog::saveInitialStates()
 {
+    int trainingLangId = m_trainingLanguageGroup->checkedId();
+    switch(trainingLangId) {
+    case 0: m_initialState.trainingLanguage = "русский"; break;
+    case 1: m_initialState.trainingLanguage = "english"; break;
+    case 2: m_initialState.trainingLanguage = "assembly"; break; // Добавлено
+    case 3: m_initialState.trainingLanguage = "c++"; break;     // Добавлено
+    }
+
     m_initialState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
-    m_initialState.trainingLanguage = (m_trainingLanguageGroup->checkedId() == 0) ? "русский" : "english";
     m_initialState.shortWords = m_shortWordsToggle->isChecked();
     m_initialState.longWords = m_longWordsToggle->isChecked();
     m_initialState.punctuation = m_punctuationToggle->isChecked();
@@ -173,7 +197,6 @@ void SettingsDialog::compareStates()
 
     if (m_initialState.trainingLanguage != m_currentState.trainingLanguage) {
         qDebug() << "Язык обучения изменен:" << QString::fromStdString(m_initialState.trainingLanguage) << "->" << QString::fromStdString(m_currentState.trainingLanguage);
-
     }
 
     if (m_initialState.shortWords != m_currentState.shortWords) {
@@ -249,12 +272,16 @@ void SettingsDialog::createTrainingLanguageSettings()
     m_trainingLanguageGroup = new QButtonGroup(this);
     m_trainingRussianRadio = new QRadioButton("Русский", trainingLanguageGroup);
     m_trainingEnglishRadio = new QRadioButton("Английский", trainingLanguageGroup);
+    m_trainingAssemblyRadio = new QRadioButton("Assembly", trainingLanguageGroup);    // Добавлено
+    m_trainingCppRadio = new QRadioButton("C++", trainingLanguageGroup);             // Добавлено
 
     // По умолчанию русский
     m_trainingRussianRadio->setChecked(true);
 
     m_trainingLanguageGroup->addButton(m_trainingRussianRadio, 0);
     m_trainingLanguageGroup->addButton(m_trainingEnglishRadio, 1);
+    m_trainingLanguageGroup->addButton(m_trainingAssemblyRadio, 2);  // Добавлено
+    m_trainingLanguageGroup->addButton(m_trainingCppRadio, 3);       // Добавлено
 
     connect(m_trainingLanguageGroup, &QButtonGroup::buttonToggled, [this](QAbstractButton *button, bool checked) {
         int id = m_trainingLanguageGroup->id(button);
@@ -263,6 +290,8 @@ void SettingsDialog::createTrainingLanguageSettings()
 
     layout->addWidget(m_trainingRussianRadio);
     layout->addWidget(m_trainingEnglishRadio);
+    layout->addWidget(m_trainingAssemblyRadio);  // Добавлено
+    layout->addWidget(m_trainingCppRadio);       // Добавлено
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
     mainLayout->insertWidget(1, trainingLanguageGroup);
