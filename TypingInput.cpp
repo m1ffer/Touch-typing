@@ -75,7 +75,7 @@ TypingInput::TypingInput(QWidget *parent)
 
             m_speedHistory.append(qMakePair(currentTime, currentSpeed));
 
-            qDebug() << "Записана точка графика:" << currentTime << "мс," << currentSpeed << "CPM";
+            //qDebug() << "Записана точка графика:" << currentTime << "мс," << currentSpeed << "CPM";
         }
     });
 
@@ -110,9 +110,11 @@ void TypingInput::setCursorColor(const QColor &color)
     updateStyle();
 }
 
-void TypingInput::setTargetText(const QString &text)
+void TypingInput::setTargetText(QString text)
 {
+    d = 0;
     m_targetText = text;
+    //m_targetText.replace("\t", "");
     m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
     m_currentPosition = 0;
     clear();
@@ -124,8 +126,10 @@ void TypingInput::setTargetText(const QString &text)
     QTextCharFormat format;
     format.setForeground(m_pendingTextColor);
     setCurrentCharFormat(format);
-
-    setPlainText(m_targetText);
+    QString aaa = QChar(0x23CE);
+    aaa.append("\n");
+    text.replace("\n", aaa);
+    setPlainText(text);
 
     // Возвращаем курсор в начало
     updateCursorPosition();
@@ -167,49 +171,55 @@ void TypingInput::insertFromMimeData(const QMimeData *source)
 // ДОБАВЛЕНО: Переопределяем keyPressEvent для дополнительных ограничений
 void TypingInput::keyPressEvent(QKeyEvent *event)
 {
+    auto key = event -> key();
     // Блокируем все комбинации клавиш для копирования/вставки
     if (event->matches(QKeySequence::Copy) ||
         event->matches(QKeySequence::Cut) ||
         event->matches(QKeySequence::Paste) ||
         event->matches(QKeySequence::SelectAll) ||
-        event->key() == Qt::Key_Insert || // Block Insert key
-        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_A) ||
-        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_C) ||
-        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_X) ||
-        (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_V) ||
-        (event->modifiers() == Qt::ShiftModifier && event->key() == Qt::Key_Insert)) {
+        key == Qt::Key_Insert || // Block Insert key
+        (event->modifiers() == Qt::ControlModifier && key == Qt::Key_A) ||
+        (event->modifiers() == Qt::ControlModifier && key == Qt::Key_C) ||
+        (event->modifiers() == Qt::ControlModifier && key == Qt::Key_X) ||
+        (event->modifiers() == Qt::ControlModifier && key == Qt::Key_V) ||
+        (event->modifiers() == Qt::ShiftModifier && key == Qt::Key_Insert)) {
 
         event->ignore(); // Полностью игнорируем эти комбинации
         return;
     }
 
     // Игнорируем клавиши навигации (уже есть, но оставляем для полноты)
-    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right ||
-        event->key() == Qt::Key_Up || event->key() == Qt::Key_Down ||
-        event->key() == Qt::Key_Home || event->key() == Qt::Key_End ||
-        event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown) {
+    if (key == Qt::Key_Left || key == Qt::Key_Right ||
+        key == Qt::Key_Up || key == Qt::Key_Down ||
+        key == Qt::Key_Home || key == Qt::Key_End ||
+        key == Qt::Key_PageUp || key == Qt::Key_PageDown) {
         event->ignore();
         return;
     }
 
     // Игнорируем специальные клавиши
-    if (event->key() == Qt::Key_Shift || event->key() == Qt::Key_Control ||
-        event->key() == Qt::Key_Alt || event->key() == Qt::Key_Meta ||
-        event->key() == Qt::Key_AltGr || event->key() == Qt::Key_CapsLock ||
-        event->key() == Qt::Key_NumLock || event->key() == Qt::Key_ScrollLock) {
+    if (key == Qt::Key_Shift || key == Qt::Key_Control ||
+        key == Qt::Key_Alt || key == Qt::Key_Meta ||
+        key == Qt::Key_AltGr || key == Qt::Key_CapsLock ||
+        key == Qt::Key_NumLock || key == Qt::Key_ScrollLock) {
         event->ignore();
         return;
     }
 
     // Обрабатываем Backspace - ИЗМЕНЕННАЯ ЛОГИКА
-    if (event->key() == Qt::Key_Backspace) {
+    if (key == Qt::Key_Backspace) {
         if (m_currentPosition > 0) {
             // Проверяем, является ли текущая позиция опорным пробелом
-            bool isReferenceSpace = (m_currentPosition > 0 &&
-                                     m_targetText[m_currentPosition - 1] == ' ' &&
-                                     m_enteredText[m_currentPosition - 1] == ' ');
+            bool isReferenceSpace = (m_targetText[m_currentPosition - 1] == ' ' &&
+                                     m_enteredText[m_currentPosition - 1] == ' ') ||
+                                    (m_targetText[m_currentPosition - 1] == '\xa' &&
+                                     m_enteredText[m_currentPosition - 1] == '\xa') ||
+                                    (m_targetText[m_currentPosition - 1] == '\t');
 
             if (!isReferenceSpace) {
+                if (m_targetText[m_currentPosition - 1] == '\xa'){
+                    d--;
+                }
                 m_currentPosition--;
                 m_enteredText.chop(1);  // Удаляем последний символ из введенного текста
                 checkCharacter(m_currentPosition, QChar());
@@ -226,7 +236,7 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
     }
 
     // Обрабатываем Delete отдельно (запрещаем)
-    if (event->key() == Qt::Key_Delete) {
+    if (key == Qt::Key_Delete) {
         event->ignore();
         return;
     }
@@ -238,16 +248,21 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
             startTimer();
         }
         QChar enteredChar = event->text().at(0);
+        if (enteredChar.unicode() == '\xd'){
+            enteredChar = '\xa';
+        }
         m_enteredText += enteredChar;  // ДОБАВЛЕНО: сохраняем введенный символ
         m_totalCharsTyped++; // ДОБАВЛЕНО: Счетчик всех нажатий
 
         // ДОБАВЛЕНО: Подсчет ошибок
+        checkCharacter(m_currentPosition, enteredChar);
         if (enteredChar != m_targetText.at(m_currentPosition)) {
             m_errorsCount++;
         }
-        checkCharacter(m_currentPosition, enteredChar);
+        if (m_targetText.at(m_currentPosition) == '\xa')
+            d++;
+        qDebug() << enteredChar.unicode() << ' ' << m_targetText.at(m_currentPosition).unicode();
         m_currentPosition++;
-
         // Обновляем позицию курсора после ввода символа
         updateCursorPosition();
 
@@ -261,6 +276,10 @@ void TypingInput::keyPressEvent(QKeyEvent *event)
             // ДОБАВЛЕНО: Останавливаем таймер при завершении
             stopTimer();
             emit inputCompleted();
+        }
+        else if(m_targetText.at(m_currentPosition) == QChar('\t')){
+            m_currentPosition++;
+            updateCursorPosition();
         }
     }
 
@@ -311,9 +330,9 @@ void TypingInput::updateTextColors()
     int oldPosition = cursor.position();
 
     // Устанавливаем цвета для всех символов
-    for (int i = 0; i < m_targetText.length(); ++i) {
-        cursor.setPosition(i);
-        cursor.setPosition(i + 1, QTextCursor::KeepAnchor);
+    for (int i = 0, tmp = 0; i < m_targetText.length(); ++i) {
+        cursor.setPosition(i + tmp);
+        cursor.setPosition(i + 1 + tmp, QTextCursor::KeepAnchor);
 
         QTextCharFormat format;
         if (i < m_currentPosition) {
@@ -413,8 +432,8 @@ void TypingInput::checkCharacter(int position, QChar enteredChar)
     if (position >= m_targetText.length()) return;
 
     QTextCursor cursor = textCursor();
-    cursor.setPosition(position);
-    cursor.setPosition(position + 1, QTextCursor::KeepAnchor);
+    cursor.setPosition(position + d);
+    cursor.setPosition(position + d + 1, QTextCursor::KeepAnchor);
 
     QTextCharFormat format;
 
@@ -436,11 +455,11 @@ void TypingInput::checkCharacter(int position, QChar enteredChar)
     update();
 }
 
-void TypingInput::updateCursorPosition()
+void TypingInput::updateCursorPosition(int f)
 {
     // Обновляем позицию курсора
     QTextCursor cursor = textCursor();
-    cursor.setPosition(m_currentPosition);
+    cursor.setPosition(m_currentPosition + d);
     setTextCursor(cursor);
 }
 
@@ -482,7 +501,7 @@ void TypingInput::startTimer()
         m_updateTimer->start(100); // Обновление каждые 100 мс
         m_historyTimer->start(100); // Записывать каждую секунду
         emit timerStarted();
-        qDebug() << "Таймер запущен";
+        //qDebug() << "Таймер запущен";
     }
 }
 
@@ -545,10 +564,10 @@ QString TypingInput::makeTextFromSettings(const Settings& settings)
 {
     // Если включены цитаты - возвращаем случайную цитату
     if (settings.quotes) {
-        return QString::fromStdString(getRandomQuote(settings.trainingLanguage).text);
+        auto q = getRandomQuote(settings.trainingLanguage);
+        return QString::fromStdString(q.text + "\n" + (settings.appLanguage == "english" ? "Source: " : "Источник: ") + q.source);
     }
     if (!settings.longWords && !settings.shortWords && !settings.numbers && !settings.punctuation){
-        //взять текст из файлика
         return QString::fromStdString(standartText[settings.trainingLanguage]);
     }
     if (!settings.longWords && !settings.shortWords){

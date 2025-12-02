@@ -31,7 +31,7 @@ public:
     // ДОБАВЛЕНО: Метод для генерации текста по настройкам
     QString makeTextFromSettings(const Settings& settings);
 
-    void setTargetText(const QString &text);
+    void setTargetText(QString text);
     void reset();
     // Методы для работы со временем
     void startTimer();
@@ -92,9 +92,9 @@ private:
     void updateStyle();
     void ensureCursorVisible();
     void checkCharacter(int position, QChar enteredChar);
-    void updateCursorPosition();
+    void updateCursorPosition(int f = 0);
     void initializeStandartText();
-
+    int d = 0;
     QColor m_cursorColor;
     QColor m_correctTextColor;
     QColor m_incorrectTextColor;
