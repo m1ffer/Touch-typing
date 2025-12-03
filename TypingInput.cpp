@@ -757,9 +757,14 @@ void TypingInput::setLesson(const unsigned int lessonId, const String& currentLa
     if (lessons[currentLang].empty()){
         MessageHelper::showError(this, "Ошибка", "Для выбранного языка нет уроков");
         reset();
+        return;
     }
-    else
-        setTargetText(lessons[currentLang][lessonId]);
+    if (lessonId >= lessons[currentLang].size()){
+        MessageHelper::showError(this, "Ошибка", "Непредвиденная ошибка. Попробуйте выбрать урок вручную");
+        reset();
+        return;
+    }
+    setTargetText(lessons[currentLang][lessonId]);
 }
 
 void TypingInput::initializeLessons(const std::map<String, std::vector<Lesson>>& mp){
