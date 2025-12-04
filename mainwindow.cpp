@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_currentMode = ui -> trainButton->text();
     m_settingsDialog = new SettingsDialog(this);
     m_currentSettings = m_settingsDialog->getCurrentSettings();
+    ui -> keyboard -> setLayoutType(m_currentSettings.trainingLanguage == "русский" ? "русский" : "english");
     updateTrainingText();
     qDebug() << "=== Начало инициализации MainWindow ===";
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");
@@ -86,6 +87,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
     m_currentMode = ui -> trainButton-> text();
     initializeLessonMap();
+    qDebug() << "bebebe";
+    ui -> typingInput -> setKeyboard(ui -> keyboard);
+    ui -> typingInput -> highlight();
+    ui -> keyboard -> disable();
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
@@ -187,6 +192,7 @@ void MainWindow::onLearnModeClicked()
 void MainWindow::switchToTrainingMode()
 {
     // Переключаем modesStackedWidget на страницу inputMode
+    ui -> keyboard -> disable();
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
     updateTrainingText();
     m_currentMode = ui -> trainButton-> text();
@@ -196,6 +202,10 @@ void MainWindow::switchToTrainingMode()
 void MainWindow::switchToLearningMode()
 {
     // Переключаем modesStackedWidget на страницу choseMode
+    if (m_currentSettings.keyboard)
+        ui -> keyboard -> enable();
+    else
+        ui -> keyboard -> disable();
     initializeLessons();
     ui->modesStackedWidget->setCurrentWidget(ui->choseMode);
     qDebug() << "Переключено на страницу выбора уроков (choseMode)";
@@ -481,14 +491,24 @@ void MainWindow::onSettingsButtonClicked()
 
     if (trainingSettingsChanged)
     {
-        if (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage)
+        if (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage){
             initializeLessons();
+            ui -> keyboard -> setLayoutType(m_currentSettings.trainingLanguage == "русский" ? "русский" : "english");
+        }
         if (m_currentMode == ui -> trainButton -> text()) {
             qDebug() << "Настройки тренировки изменились, обновляем текст";
             updateTrainingText();
         }
         else{
 
+        }
+    }
+    if (m_currentMode == ui -> learnButton -> text()){
+        if (!oldSettings.keyboard && m_currentSettings.keyboard){
+            ui -> keyboard -> enable();
+        }
+        if (oldSettings.keyboard && !m_currentSettings.keyboard){
+            ui -> keyboard -> disable();
         }
     }
 }

@@ -30,6 +30,7 @@ TypingInput::TypingInput(QWidget *parent)
     m_totalCharsTyped(0),
     m_timerActive(false),
     m_finalTimeMs(0),
+    keyboard(nullptr),
     m_gen(m_rd())
 {
     initializeStandartText();
@@ -131,9 +132,12 @@ void TypingInput::setCursorColor(const QColor &color)
 
 void TypingInput::setTargetText(QString text)
 {
+    if (text.size() == 0){
+        qDebug() << "TypingInput 135";
+        return;
+    }
     d = 0;
     m_targetText = text;
-    //m_targetText.replace("\t", "");
     m_enteredText.clear();  // ДОБАВЛЕНО: очищаем введенный текст
     m_currentPosition = 0;
     clear();
@@ -159,6 +163,7 @@ void TypingInput::setTargetText(QString text)
     m_speedHistory.clear();     // ДОБАВИТЬ
     m_accuracyHistory.clear();  // ДОБАВИТЬ
     m_finalTimeMs = 0; // СБРАСЫВАЕМ время
+    //keyboard -> highlightKey(m_targetText[0]);
 }
 
 void TypingInput::reset()
@@ -479,7 +484,9 @@ void TypingInput::updateCursorPosition(int f)
     // Обновляем позицию курсора
     QTextCursor cursor = textCursor();
     cursor.setPosition(m_currentPosition + d);
+    //keyboard -> highlightKey(m_targetText[m_currentPosition]);
     setTextCursor(cursor);
+    highlight();
 }
 
 bool TypingInput::setTargetTextFromFile(const QString &filePath)
@@ -584,7 +591,7 @@ QString TypingInput::makeTextFromSettings(const Settings& settings)
     // Если включены цитаты - возвращаем случайную цитату
     if (settings.quotes) {
         auto q = getRandomQuote(settings.trainingLanguage);
-        return QString::fromStdString(q.text + "\n" + (settings.appLanguage == "english" ? "Source: " : "Источник: ") + q.source);
+        return QString::fromStdString(q.text + "\n" + (settings.trainingLanguage == "русский" ? "Источник: " : "Source: ") + q.source);
     }
     if (!settings.longWords && !settings.shortWords && !settings.numbers && !settings.punctuation){
         return QString::fromStdString(standartText[settings.trainingLanguage]);
@@ -678,7 +685,7 @@ QString TypingInput::capitalizeWord(const QString& word)
 
 QString TypingInput::addPunctuation(const QString& word)
 {
-    static const QVector<QString> punctuationMarks = {",", ".", "!", "?", ";", ":", "—"};
+    static const QVector<QString> punctuationMarks = {",", ".", "!", "?", ";", ":", "-"};
     std::uniform_int_distribution<> punctDist(0, punctuationMarks.size() - 1);
     std::uniform_int_distribution<> capDist(0, 1);
     if (capDist(m_gen))
@@ -764,6 +771,7 @@ void TypingInput::setLesson(const unsigned int lessonId, const String& currentLa
         reset();
         return;
     }
+    keyboard -> setLayoutType(QString::fromStdString(currentLang));
     setTargetText(lessons[currentLang][lessonId]);
 }
 
@@ -773,5 +781,15 @@ void TypingInput::initializeLessons(const std::map<String, std::vector<Lesson>>&
         for (int i = 0; i < v.size(); i++){
             lessons[lang][v.size() - i - 1] = QString::fromStdString(v[i].text);
         }
+    }
+}
+
+void TypingInput::setKeyboard(KeyboardWidget *keyboard){
+    this -> keyboard = keyboard;
+}
+
+void TypingInput::highlight(){
+    if (keyboard != NULL && keyboard != nullptr && m_targetText.size() != 0 && m_currentPosition < m_targetText.size() && m_currentPosition >= 0){
+        keyboard -> highlightKey(m_targetText[m_currentPosition]);
     }
 }

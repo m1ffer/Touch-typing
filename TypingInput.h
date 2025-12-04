@@ -15,6 +15,7 @@
 #include <map> // ДОБАВИТЬ
 #include <random> // ДОБАВИТЬ для случайных чисел
 #include <vector> // ДОБАВИТЬ
+#include "KeyboardWidget.h"
 
 class TypingInput : public QTextEdit
 {
@@ -30,7 +31,7 @@ public:
 
     // ДОБАВЛЕНО: Метод для генерации текста по настройкам
     QString makeTextFromSettings(const Settings& settings);
-
+    void setKeyboard(KeyboardWidget* keyboard);
     void setTargetText(QString text);
     void reset();
     // Методы для работы со временем
@@ -66,6 +67,7 @@ public:
      //QVector<QPair<qint64, double>> getSpeedHistory() const;
     void setLesson(const unsigned int lessonId, const String& currentLang);
     void initializeLessons(const std::map<String, std::vector<Lesson>>& mp);
+    void highlight();
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();
@@ -142,6 +144,7 @@ private:
     std::mt19937 m_gen;
     const std::string PATH_TO_STANDART_TEXT = "../../res/languages/standartText";
     std::map<String, String> standartText;
+    KeyboardWidget *keyboard;
 };
 
 #endif // TYPINGINPUT_H

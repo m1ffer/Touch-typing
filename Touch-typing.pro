@@ -7,6 +7,7 @@ CONFIG += c++17
 SOURCES += \
     ControlButton.cpp \
     JSONParser.cpp \
+    KeyboardWidget.cpp \
     MessageHelper.cpp \
     ScrollButtonWidget.cpp \
     SettingsDialog.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     ControlButton.h \
     JSONParser.h \
+    KeyboardWidget.h \
     MessageHelper.h \
     ScrollButtonWidget.h \
     SettingsDialog.h \

@@ -10,6 +10,7 @@
 #define UI_MAINWINDOW_H
 
 #include <ControlButton.h>
+#include <KeyboardWidget.h>
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
@@ -48,15 +49,15 @@ public:
     QGridLayout *gridLayout_9;
     QGridLayout *gridLayout_7;
     QGridLayout *gridLayout_10;
-    TypingInput *typingInput;
     QGridLayout *gridLayout_17;
-    ControlButton *resetButton;
     QSpacerItem *horizontalSpacer_4;
     QSpacerItem *horizontalSpacer_5;
+    ControlButton *resetButton;
     QLabel *timerLabel;
     QSpacerItem *horizontalSpacer_7;
     QSpacerItem *horizontalSpacer_8;
-    QSpacerItem *verticalSpacer;
+    KeyboardWidget *keyboard;
+    TypingInput *typingInput;
     QWidget *choseMode;
     QHBoxLayout *horizontalLayout;
     QGridLayout *gridLayout_15;
@@ -134,21 +135,8 @@ public:
         gridLayout_7->setObjectName("gridLayout_7");
         gridLayout_10 = new QGridLayout();
         gridLayout_10->setObjectName("gridLayout_10");
-        typingInput = new TypingInput(inputMode);
-        typingInput->setObjectName("typingInput");
-
-        gridLayout_10->addWidget(typingInput, 0, 0, 1, 1);
-
         gridLayout_17 = new QGridLayout();
         gridLayout_17->setObjectName("gridLayout_17");
-        resetButton = new ControlButton(inputMode);
-        resetButton->setObjectName("resetButton");
-        QIcon icon;
-        icon.addFile(QString::fromUtf8(":/icons/res/resetButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        resetButton->setIcon(icon);
-
-        gridLayout_17->addWidget(resetButton, 1, 1, 1, 1);
-
         horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         gridLayout_17->addItem(horizontalSpacer_4, 1, 0, 1, 1);
@@ -156,6 +144,14 @@ public:
         horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         gridLayout_17->addItem(horizontalSpacer_5, 1, 2, 1, 1);
+
+        resetButton = new ControlButton(inputMode);
+        resetButton->setObjectName("resetButton");
+        QIcon icon;
+        icon.addFile(QString::fromUtf8(":/icons/res/resetButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        resetButton->setIcon(icon);
+
+        gridLayout_17->addWidget(resetButton, 1, 1, 1, 1);
 
         timerLabel = new QLabel(inputMode);
         timerLabel->setObjectName("timerLabel");
@@ -178,15 +174,21 @@ public:
 
         gridLayout_17->addItem(horizontalSpacer_8, 0, 0, 1, 1);
 
+        keyboard = new KeyboardWidget(inputMode);
+        keyboard->setObjectName("keyboard");
+
+        gridLayout_17->addWidget(keyboard, 2, 1, 1, 1);
+
         gridLayout_17->setColumnStretch(0, 10);
         gridLayout_17->setColumnStretch(1, 1);
         gridLayout_17->setColumnStretch(2, 10);
 
         gridLayout_10->addLayout(gridLayout_17, 1, 0, 1, 1);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+        typingInput = new TypingInput(inputMode);
+        typingInput->setObjectName("typingInput");
 
-        gridLayout_10->addItem(verticalSpacer, 2, 0, 1, 1);
+        gridLayout_10->addWidget(typingInput, 0, 0, 1, 1);
 
         gridLayout_10->setRowStretch(0, 5);
 
