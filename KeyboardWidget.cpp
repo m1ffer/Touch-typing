@@ -275,7 +275,7 @@ void KeyboardWidget::highlightKey(const QString &key)
             QString color = (processedKey == "Space") ? "#B8860B" : "#FF6464";
             buttons[processedKey]->setStyleSheet(
                 QString("QPushButton {"
-                        "  background-color: %1;"
+                        "  background-color: #FF6464;"
                         "  border: 2px solid #FF0000;"
                         "  border-radius: 3px;"
                         "  color: black;"
