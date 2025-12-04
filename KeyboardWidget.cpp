@@ -190,12 +190,67 @@ void KeyboardWidget::updateDisplay()
     }
 }
 
+#include "KeyboardWidget.h"
+#include <QDebug>
+
+// ... остальной код без изменений ...
+
+QString KeyboardWidget::detectLayoutFromSymbol(const QString &symbol)
+{
+    if (symbol.isEmpty()) {
+        return "";
+    }
+
+    QChar ch = symbol[0];
+
+    // Русские символы
+    static QString russianLetters = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    static QString russianSymbols = "№";
+
+    // Английские символы (латиница)
+    static QString englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    // Специальные символы, которые явно указывают на английскую раскладку
+    static QString englishSpecificSymbols = "~@#$^&*_+{}|:\"<>?";
+
+    // Проверяем русские символы
+    if (russianLetters.contains(ch) || russianSymbols.contains(ch) || symbol == "№") {
+        return "русский";
+    }
+
+    // Проверяем английские символы
+    if (englishLetters.contains(ch) || englishSpecificSymbols.contains(ch)) {
+        return "english";
+    }
+
+    // Символы, которые могут быть в обеих раскладках (цифры, некоторые знаки препинания)
+    // Для них не меняем раскладку
+    static QString ambiguousSymbols = "0123456789!%()=[]\\;',./";
+    if (ambiguousSymbols.contains(ch)) {
+        return ""; // Оставляем текущую раскладку
+    }
+
+    // Если символ не распознан, оставляем текущую раскладку
+    return "";
+}
+
 void KeyboardWidget::highlightKey(const QString &key)
 {
-
+    // Если клавиатура отключена, не подсвечиваем
     if (!keyboardEnabled) {
         return;
     }
+
+    // Определяем язык символа
+    QString detectedLayout = detectLayoutFromSymbol(key);
+
+    // Если определили язык и он отличается от текущего - меняем раскладку
+    if (!detectedLayout.isEmpty() && detectedLayout != currentLayout) {
+        setLayoutType(detectedLayout);
+    }
+
+    // Далее идет существующий код highlightKey...
+    // Только добавим в начало проверку на keyboardEnabled
 
     // Сначала сбрасываем все подсветки
     resetHighlights();
@@ -216,14 +271,15 @@ void KeyboardWidget::highlightKey(const QString &key)
     // Если это специальная клавиша, просто подсвечиваем ее
     if (specialKeys.contains(processedKey)) {
         if (buttons.contains(processedKey)) {
+            // Для пробела используем более темный оттенок коричневого при подсветке
+            QString color = (processedKey == "Space") ? "#B8860B" : "#FF6464";
             buttons[processedKey]->setStyleSheet(
-                "QPushButton {"
-                "  background-color: #FF6464;"
-                "  border: 2px solid #FF0000;"
-                "  border-radius: 3px;"
-                "  color: black;"
-                "}"
-                );
+                QString("QPushButton {"
+                        "  background-color: %1;"
+                        "  border: 2px solid #FF0000;"
+                        "  border-radius: 3px;"
+                        "  color: black;"
+                        "}").arg(color));
         }
         return;
     }
@@ -395,6 +451,8 @@ void KeyboardWidget::highlightKey(const QString &key)
             );
     }
 }
+
+// ... остальной код без изменений ...
 
 void KeyboardWidget::resetHighlights()
 {

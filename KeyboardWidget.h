@@ -18,14 +18,13 @@ public:
 
     void highlightKey(const QString &key);
     void resetHighlights();
-    void setLayoutType(const QString &layout);
 
-    // Новые методы для включения/выключения отображения
     void enable();
     void disable();
     bool isEnabled() const;
 
 private:
+    void setLayoutType(const QString &layout);
     QVBoxLayout *mainLayout;
     QMap<QString, QPushButton*> buttons;
     QString currentLayout = "english";
@@ -39,6 +38,7 @@ private:
     void updateDisplay();
     void initHandKeys();
     void setButtonColors();
+    QString detectLayoutFromSymbol(const QString &symbol); // Новый метод
 };
 
 #endif // KEYBOARDWIDGET_H

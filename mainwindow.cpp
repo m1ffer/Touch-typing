@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_currentMode = ui -> trainButton->text();
     m_settingsDialog = new SettingsDialog(this);
     m_currentSettings = m_settingsDialog->getCurrentSettings();
-    ui -> keyboard -> setLayoutType(m_currentSettings.trainingLanguage == "русский" ? "русский" : "english");
     updateTrainingText();
     qDebug() << "=== Начало инициализации MainWindow ===";
     QPushButton *trainButton = findChild<QPushButton*>("trainButton");
@@ -493,7 +492,6 @@ void MainWindow::onSettingsButtonClicked()
     {
         if (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage){
             initializeLessons();
-            ui -> keyboard -> setLayoutType(m_currentSettings.trainingLanguage == "русский" ? "русский" : "english");
         }
         if (m_currentMode == ui -> trainButton -> text()) {
             qDebug() << "Настройки тренировки изменились, обновляем текст";
@@ -505,10 +503,10 @@ void MainWindow::onSettingsButtonClicked()
     }
     if (m_currentMode == ui -> learnButton -> text()){
         if (!oldSettings.keyboard && m_currentSettings.keyboard){
-            ui -> keyboard -> enable();
+            ui -> typingInput -> enableKeyboard();
         }
         if (oldSettings.keyboard && !m_currentSettings.keyboard){
-            ui -> keyboard -> disable();
+            ui -> typingInput -> disableKeyboard();
         }
     }
 }

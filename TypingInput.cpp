@@ -594,7 +594,7 @@ QString TypingInput::makeTextFromSettings(const Settings& settings)
         return QString::fromStdString(q.text + "\n" + (settings.trainingLanguage == "русский" ? "Источник: " : "Source: ") + q.source);
     }
     if (!settings.longWords && !settings.shortWords && !settings.numbers && !settings.punctuation){
-        return QString::fromStdString(standartText[settings.trainingLanguage]);
+        return QString::fromStdString(standartText[settings.appLanguage]);
     }
     if (!settings.longWords && !settings.shortWords){
         Settings tmp = settings;
@@ -771,7 +771,7 @@ void TypingInput::setLesson(const unsigned int lessonId, const String& currentLa
         reset();
         return;
     }
-    keyboard -> setLayoutType(QString::fromStdString(currentLang));
+    //keyboard -> setLayoutType(QString::fromStdString(currentLang));
     setTargetText(lessons[currentLang][lessonId]);
 }
 
@@ -792,4 +792,13 @@ void TypingInput::highlight(){
     if (keyboard != NULL && keyboard != nullptr && m_targetText.size() != 0 && m_currentPosition < m_targetText.size() && m_currentPosition >= 0){
         keyboard -> highlightKey(m_targetText[m_currentPosition]);
     }
+}
+
+void TypingInput::enableKeyboard(){
+    keyboard -> enable();
+    keyboard -> highlightKey(m_targetText[m_currentPosition]);
+}
+
+void TypingInput::disableKeyboard(){
+    keyboard -> disable();
 }

@@ -28,7 +28,8 @@ class TypingInput : public QTextEdit
 
 public:
     explicit TypingInput(QWidget *parent = nullptr);
-
+    void enableKeyboard();
+    void disableKeyboard();
     // ДОБАВЛЕНО: Метод для генерации текста по настройкам
     QString makeTextFromSettings(const Settings& settings);
     void setKeyboard(KeyboardWidget* keyboard);
