@@ -89,7 +89,10 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "bebebe";
     ui -> typingInput -> setKeyboard(ui -> keyboard);
     ui -> typingInput -> highlight();
-    ui -> keyboard -> disable();
+    if (!m_currentSettings.keyboard)
+        ui -> keyboard -> disable();
+    else
+        ui ->keyboard ->enable();
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
@@ -191,7 +194,6 @@ void MainWindow::onLearnModeClicked()
 void MainWindow::switchToTrainingMode()
 {
     // Переключаем modesStackedWidget на страницу inputMode
-    ui -> keyboard -> disable();
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
     updateTrainingText();
     m_currentMode = ui -> trainButton-> text();
@@ -501,19 +503,24 @@ void MainWindow::onSettingsButtonClicked()
 
         }
     }
-    if (m_currentMode == ui -> learnButton -> text()){
         if (!oldSettings.keyboard && m_currentSettings.keyboard){
             ui -> typingInput -> enableKeyboard();
         }
         if (oldSettings.keyboard && !m_currentSettings.keyboard){
             ui -> typingInput -> disableKeyboard();
         }
-    }
 }
 
 // ДОБАВЛЕНО: Метод для обновления текста тренировки
 void MainWindow::updateTrainingText()
 {
+    if (m_currentSettings.keyboard){
+        ui -> keyboard -> enable();
+
+    }
+    else{
+        ui -> keyboard -> disable();
+    }
     QString trainingText = ui->typingInput->makeTextFromSettings(m_currentSettings);
     ui->typingInput->setTargetText(trainingText);
     updateTimerDisplay(0);
