@@ -7,5 +7,5 @@
   "numbers": false,
   "quotes": false,
   "highlight": true,
-  "keyboard": true
+  "keyboard": false
 }

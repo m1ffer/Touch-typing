@@ -50,15 +50,18 @@ public:
     QGridLayout *gridLayout_9;
     QGridLayout *gridLayout_7;
     QGridLayout *gridLayout_10;
-    QGridLayout *gridLayout_17;
-    QSpacerItem *horizontalSpacer_4;
-    QSpacerItem *horizontalSpacer_5;
-    ControlButton *resetButton;
-    QLabel *timerLabel;
-    QSpacerItem *horizontalSpacer_7;
-    QSpacerItem *horizontalSpacer_8;
-    KeyboardWidget *keyboard;
     TypingInput *typingInput;
+    QGridLayout *gridLayout_17;
+    QGridLayout *gridLayout_20;
+    QSpacerItem *horizontalSpacer_2;
+    QSpacerItem *horizontalSpacer;
+    QLabel *timerLabel;
+    QGridLayout *gridLayout_22;
+    QSpacerItem *horizontalSpacer_5;
+    QSpacerItem *horizontalSpacer_4;
+    ControlButton *resetButton;
+    QGridLayout *gridLayout_23;
+    KeyboardWidget *keyboard;
     QWidget *choseMode;
     QHBoxLayout *horizontalLayout;
     QGridLayout *gridLayout_15;
@@ -138,23 +141,22 @@ public:
         gridLayout_7->setObjectName("gridLayout_7");
         gridLayout_10 = new QGridLayout();
         gridLayout_10->setObjectName("gridLayout_10");
+        typingInput = new TypingInput(inputMode);
+        typingInput->setObjectName("typingInput");
+
+        gridLayout_10->addWidget(typingInput, 0, 0, 1, 1);
+
         gridLayout_17 = new QGridLayout();
         gridLayout_17->setObjectName("gridLayout_17");
-        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        gridLayout_20 = new QGridLayout();
+        gridLayout_20->setObjectName("gridLayout_20");
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_17->addItem(horizontalSpacer_4, 1, 0, 1, 1);
+        gridLayout_20->addItem(horizontalSpacer_2, 0, 2, 1, 1);
 
-        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_17->addItem(horizontalSpacer_5, 1, 2, 1, 1);
-
-        resetButton = new ControlButton(inputMode);
-        resetButton->setObjectName("resetButton");
-        QIcon icon;
-        icon.addFile(QString::fromUtf8(":/icons/res/resetButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        resetButton->setIcon(icon);
-
-        gridLayout_17->addWidget(resetButton, 1, 1, 1, 1);
+        gridLayout_20->addItem(horizontalSpacer, 0, 0, 1, 1);
 
         timerLabel = new QLabel(inputMode);
         timerLabel->setObjectName("timerLabel");
@@ -167,31 +169,44 @@ public:
 "    border-radius: 0px;\n"
 "    font-weight: 500;"));
 
-        gridLayout_17->addWidget(timerLabel, 0, 1, 1, 1);
+        gridLayout_20->addWidget(timerLabel, 0, 1, 1, 1);
 
-        horizontalSpacer_7 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_17->addItem(horizontalSpacer_7, 0, 2, 1, 1);
+        gridLayout_17->addLayout(gridLayout_20, 0, 0, 1, 1);
 
-        horizontalSpacer_8 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        gridLayout_22 = new QGridLayout();
+        gridLayout_22->setObjectName("gridLayout_22");
+        horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
-        gridLayout_17->addItem(horizontalSpacer_8, 0, 0, 1, 1);
+        gridLayout_22->addItem(horizontalSpacer_5, 0, 2, 1, 1);
 
+        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+
+        gridLayout_22->addItem(horizontalSpacer_4, 0, 0, 1, 1);
+
+        resetButton = new ControlButton(inputMode);
+        resetButton->setObjectName("resetButton");
+        QIcon icon;
+        icon.addFile(QString::fromUtf8(":/icons/res/resetButton.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        resetButton->setIcon(icon);
+
+        gridLayout_22->addWidget(resetButton, 0, 1, 1, 1);
+
+
+        gridLayout_17->addLayout(gridLayout_22, 1, 0, 1, 1);
+
+        gridLayout_23 = new QGridLayout();
+        gridLayout_23->setObjectName("gridLayout_23");
         keyboard = new KeyboardWidget(inputMode);
         keyboard->setObjectName("keyboard");
 
-        gridLayout_17->addWidget(keyboard, 2, 1, 1, 1);
+        gridLayout_23->addWidget(keyboard, 0, 0, 1, 1);
 
-        gridLayout_17->setColumnStretch(0, 10);
-        gridLayout_17->setColumnStretch(1, 1);
-        gridLayout_17->setColumnStretch(2, 10);
+
+        gridLayout_17->addLayout(gridLayout_23, 3, 0, 1, 1);
+
 
         gridLayout_10->addLayout(gridLayout_17, 1, 0, 1, 1);
-
-        typingInput = new TypingInput(inputMode);
-        typingInput->setObjectName("typingInput");
-
-        gridLayout_10->addWidget(typingInput, 0, 0, 1, 1);
 
         gridLayout_10->setRowStretch(0, 5);
 
@@ -364,8 +379,8 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        resetButton->setText(QString());
         timerLabel->setText(QCoreApplication::translate("MainWindow", "TextLabel", nullptr));
+        resetButton->setText(QString());
         closeChoseButton->setText(QString());
         nameLabel->setText(QCoreApplication::translate("MainWindow", "Bebeb", nullptr));
         infoButton->setText(QString());

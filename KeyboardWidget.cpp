@@ -10,6 +10,13 @@ KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent)
     createLayout();
     updateDisplay();
     setButtonColors();
+    setFixedSize(700, 250); // Подберите размеры под ваш макет
+
+    // ИЛИ рассчитать размер на основе макета:
+    // setFixedSize(minimumSizeHint());
+
+    // Дополнительно: запретить изменение размера
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
 KeyboardWidget::~KeyboardWidget()

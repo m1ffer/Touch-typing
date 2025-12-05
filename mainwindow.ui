@@ -59,49 +59,43 @@
                    <layout class="QGridLayout" name="gridLayout_7" rowstretch="1">
                     <item row="0" column="0">
                      <layout class="QGridLayout" name="gridLayout_10" rowstretch="5,0">
+                      <item row="0" column="0">
+                       <widget class="TypingInput" name="typingInput"/>
+                      </item>
                       <item row="1" column="0">
-                       <layout class="QGridLayout" name="gridLayout_17" columnstretch="10,1,10">
-                        <item row="1" column="0">
-                         <spacer name="horizontalSpacer_4">
-                          <property name="orientation">
-                           <enum>Qt::Orientation::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>40</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item row="1" column="2">
-                         <spacer name="horizontalSpacer_5">
-                          <property name="orientation">
-                           <enum>Qt::Orientation::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>40</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item row="1" column="1">
-                         <widget class="ControlButton" name="resetButton">
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="icon">
-                           <iconset resource="resources.qrc">
-                            <normaloff>:/icons/res/resetButton.svg</normaloff>:/icons/res/resetButton.svg</iconset>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QLabel" name="timerLabel">
-                          <property name="styleSheet">
-                           <string notr="true">color: #ffd700;
+                       <layout class="QGridLayout" name="gridLayout_17" columnstretch="0">
+                        <item row="0" column="0">
+                         <layout class="QGridLayout" name="gridLayout_20">
+                          <item row="0" column="2">
+                           <spacer name="horizontalSpacer_2">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item row="0" column="0">
+                           <spacer name="horizontalSpacer">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item row="0" column="1">
+                           <widget class="QLabel" name="timerLabel">
+                            <property name="styleSheet">
+                             <string notr="true">color: #ffd700;
     font-size: 16px;
     font-family: 'Roboto Mono', 'Consolas', monospace;
     background-color: transparent;
@@ -109,45 +103,63 @@
     border: 1px solid #3a3a3a;
     border-radius: 0px;
     font-weight: 500;</string>
-                          </property>
-                          <property name="text">
-                           <string>TextLabel</string>
-                          </property>
-                         </widget>
+                            </property>
+                            <property name="text">
+                             <string>TextLabel</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
                         </item>
-                        <item row="0" column="2">
-                         <spacer name="horizontalSpacer_7">
-                          <property name="orientation">
-                           <enum>Qt::Orientation::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>40</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
+                        <item row="1" column="0">
+                         <layout class="QGridLayout" name="gridLayout_22">
+                          <item row="0" column="2">
+                           <spacer name="horizontalSpacer_5">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item row="0" column="0">
+                           <spacer name="horizontalSpacer_4">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item row="0" column="1">
+                           <widget class="ControlButton" name="resetButton">
+                            <property name="text">
+                             <string/>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="resources.qrc">
+                              <normaloff>:/icons/res/resetButton.svg</normaloff>:/icons/res/resetButton.svg</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
                         </item>
-                        <item row="0" column="0">
-                         <spacer name="horizontalSpacer_8">
-                          <property name="orientation">
-                           <enum>Qt::Orientation::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>40</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item row="2" column="1">
-                         <widget class="KeyboardWidget" name="keyboard" native="true"/>
+                        <item row="3" column="0">
+                         <layout class="QGridLayout" name="gridLayout_23">
+                          <item row="0" column="0">
+                           <widget class="KeyboardWidget" name="keyboard" native="true"/>
+                          </item>
+                         </layout>
                         </item>
                        </layout>
-                      </item>
-                      <item row="0" column="0">
-                       <widget class="TypingInput" name="typingInput"/>
                       </item>
                      </layout>
                     </item>

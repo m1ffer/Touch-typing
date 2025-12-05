@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settingsDialog(nullptr)
 {
     ui->setupUi(this);
+    ui -> gridLayout_17 -> setAlignment(Qt::AlignCenter); // Выравнивание всех виджетов по центру
     ui->centralwidget->setStyleSheet(R"(
         QWidget {
             background-color: #1a1a1a;
@@ -97,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui -> rightHand -> setImage("../../res/rightHand.png");
     if (!m_currentSettings.highlight)
         disableHands();
+
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
