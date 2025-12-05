@@ -479,7 +479,6 @@ void KeyboardWidget::setLayoutType(const QString &layout)
 
 void KeyboardWidget::setButtonColors()
 {
-
     if (!keyboardEnabled) {
         return;
     }
@@ -489,85 +488,78 @@ void KeyboardWidget::setButtonColors()
         it.value()->setStyleSheet("background-color: #DCDCDC; border: 1px solid #888; border-radius: 3px; color: black;");
     }
 
-    // Теперь красим цветные зоны
+    // Теперь красим цветные зоны с новыми цветами
 
-    // Левый мизинец (`, 1, 2, Q, A, Z) - светло-розовый
-    QStringList leftPinky = {"`", "1", "2", "Q", "A", "Z"};
+    // Левый мизинец - rgb(199, 112, 109)
+    QStringList leftPinky = {"`", "1", "2", "Q", "A", "Z", "Shift"};
     for (const QString &key : leftPinky) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #FFB6C1; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(199, 112, 109); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Левый безымянный (3, W, S, X) - светло-оранжевый
+    // Левый безымянный - rgb(200, 198, 108)
     QStringList leftRing = {"3", "W", "S", "X"};
     for (const QString &key : leftRing) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #FFDAB9; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(200, 198, 108); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Левый средний (4, E, D, C) - светло-желтый
+    // Левый средний - rgb(108, 203, 113)
     QStringList leftMiddle = {"4", "E", "D", "C"};
     for (const QString &key : leftMiddle) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #FFFACD; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(108, 203, 113); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Левый указательный (5, 6, R, T, F, G, V, B) - светло-зеленый
+    // Левый указательный - rgb(108, 200, 194)
     QStringList leftIndex = {"5", "6", "R", "T", "F", "G", "V", "B"};
     for (const QString &key : leftIndex) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #98FB98; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(108, 200, 194); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Правый указательный (7, Y, U, H, J, N, M) - светло-голубой
+    // Правый указательный - rgb(195, 108, 200)
     QStringList rightIndex = {"7", "Y", "U", "H", "J", "N", "M"};
     for (const QString &key : rightIndex) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #E0FFFF; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(195, 108, 200); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Правый средний (8, I, K, ,) - лавандовый
+    // Правый средний - rgb(199, 112, 109)
     QStringList rightMiddle = {"8", "I", "K", ","};
     for (const QString &key : rightMiddle) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #E6E6FA; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(199, 112, 109); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Правый безымянный (9, O, L, .) - светло-фиолетовый
+    // Правый безымянный - rgb(200, 198, 108)
     QStringList rightRing = {"9", "O", "L", "."};
     for (const QString &key : rightRing) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #D8BFD8; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(200, 198, 108); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Правый мизинец (0, -, =, P, [, ], \, ;, ', /, Shift_R, Enter, Backspace) - розовый
+    // Правый мизинец - rgb(108, 203, 113)
     QStringList rightPinky = {"0", "-", "=", "P", "[", "]", "\\", ";", "'", "/", "Shift_R", "Enter", "Backspace"};
     for (const QString &key : rightPinky) {
         if (buttons.contains(key)) {
-            buttons[key]->setStyleSheet("background-color: #FFC0CB; border: 1px solid #888; border-radius: 3px; color: black;");
+            buttons[key]->setStyleSheet("background-color: rgb(108, 203, 113); border: 1px solid #888; border-radius: 3px; color: black;");
         }
     }
 
-    // Левый Shift (отдельно, т.к. левый мизинец)
-    if (buttons.contains("Shift")) {
-        buttons["Shift"]->setStyleSheet("background-color: #FFB6C1; border: 1px solid #888; border-radius: 3px; color: black;");
-    }
-
-    // Пробел - цвет для больших пальцев (светло-коричневый, чтобы был заметен)
+    // Большой палец обеих рук (пробел) - rgb(113, 111, 201)
     if (buttons.contains("Space")) {
-        buttons["Space"]->setStyleSheet("background-color: #D2B48C; border: 1px solid #888; border-radius: 3px; color: black;");
+        buttons["Space"]->setStyleSheet("background-color: rgb(113, 111, 201); border: 1px solid #888; border-radius: 3px; color: black;");
     }
 
-    // Остальные клавиши остаются серыми (как было установлено в начале):
-    // Tab, Caps, Ctrl, Ctrl_R, Alt, Win, AltGr
-    // Эти клавиши уже имеют серый цвет #DCDCDC
+    // Остальные клавиши (Tab, Caps, Ctrl, Ctrl_R, Alt, Win, AltGr) остаются серыми #DCDCDC
 }
 
 void KeyboardWidget::enable()
