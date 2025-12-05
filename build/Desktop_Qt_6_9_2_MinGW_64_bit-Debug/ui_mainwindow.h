@@ -271,16 +271,15 @@ public:
         nameLabel = new QLabel(page);
         nameLabel->setObjectName("nameLabel");
         nameLabel->setStyleSheet(QString::fromUtf8("QLabel {\n"
-"        font-family: 'Helvetica Neue', 'Arial', sans-serif;\n"
-"        font-size: 34px;\n"
-"        font-weight: 400;\n"
-"        color: #2c3e50;\n"
-"        text-align: center;\n"
-"        padding: 30px;\n"
-"        background: transparent;\n"
-"        text-transform: uppercase;\n"
-"        letter-spacing: 3px;\n"
-"    }"));
+"    font-family: 'Roboto Mono', 'Consolas', monospace;\n"
+"    font-size: 36px;\n"
+"    font-weight: 300; /* \321\202\320\276\320\275\320\272\320\270\320\271 */\n"
+"    color: #ffd700;\n"
+"    background-color: transparent;\n"
+"    text-align: center;\n"
+"    letter-spacing: 4px;\n"
+"    text-transform: uppercase;\n"
+"}"));
 
         gridLayout_8->addWidget(nameLabel, 0, 0, 1, 1);
 
@@ -382,7 +381,7 @@ public:
         timerLabel->setText(QCoreApplication::translate("MainWindow", "TextLabel", nullptr));
         resetButton->setText(QString());
         closeChoseButton->setText(QString());
-        nameLabel->setText(QCoreApplication::translate("MainWindow", "Bebeb", nullptr));
+        nameLabel->setText(QCoreApplication::translate("MainWindow", "BebebeType", nullptr));
         infoButton->setText(QString());
         settingsButton->setText(QString());
         learnButton->setText(QCoreApplication::translate("MainWindow", "\320\236\320\261\321\203\321\207\320\265\320\275\320\270\320\265", nullptr));

@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(ui->closeChoseButton, &QPushButton::clicked, this, &MainWindow::onCloseChoseButtonClicked);
         connect(ui->settingsButton, &QPushButton::clicked, this, &MainWindow::onSettingsButtonClicked);
         connect(ui->typingInput, &TypingInput::inputCompleted, this, &MainWindow::showTypingResults);
-
+        connect(ui -> infoButton, &QPushButton::clicked, this, &MainWindow::onInfoButtonClicked);
         applyButtonStyle();
     } else {
         qDebug() << "ОШИБКА: Не все кнопки найдены!";
@@ -563,4 +563,8 @@ void MainWindow::enableHands(){
 void MainWindow::disableHands(){
     ui -> leftHand -> disable();
     ui -> rightHand -> disable();
+}
+
+void MainWindow::onInfoButtonClicked(){
+    MessageHelper::showInfo(this, "Информация", "Разработчик: Строгонов Никита Дмитриевич.\nНомер группы: 451001\nКафедра: Программное обеспечение программных технологий");
 }

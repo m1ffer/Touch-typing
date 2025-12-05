@@ -5,7 +5,7 @@
   "longWords": false,
   "punctuation": false,
   "numbers": false,
-  "quotes": false,
+  "quotes": true,
   "highlight": true,
-  "keyboard": false
+  "keyboard": true
 }

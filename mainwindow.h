@@ -34,6 +34,7 @@ private slots:
     void onStatsRepeatRequested();
     void onStatsNextRequested();
     void onSettingsButtonClicked();
+    void onInfoButtonClicked();
 
 private:
     const String PATH_TO_LESSONS = "../../res/languages/lessons";

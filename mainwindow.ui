@@ -222,19 +222,18 @@
                  <widget class="QLabel" name="nameLabel">
                   <property name="styleSheet">
                    <string notr="true">QLabel {
-        font-family: 'Helvetica Neue', 'Arial', sans-serif;
-        font-size: 34px;
-        font-weight: 400;
-        color: #2c3e50;
-        text-align: center;
-        padding: 30px;
-        background: transparent;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-    }</string>
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 36px;
+    font-weight: 300; /* тонкий */
+    color: #ffd700;
+    background-color: transparent;
+    text-align: center;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}</string>
                   </property>
                   <property name="text">
-                   <string>Bebeb</string>
+                   <string>BebebeType</string>
                   </property>
                  </widget>
                 </item>
