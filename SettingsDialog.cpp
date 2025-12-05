@@ -10,16 +10,26 @@
 #include <sstream>
 #include "ui_mainwindow.h"
 
-              SettingsDialog::SettingsDialog(QWidget *parent)
+SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
-, m_appLanguageGroup(nullptr)
-, m_trainingLanguageGroup(nullptr)
-, m_trainingAssemblyRadio(nullptr)    // Инициализация
-, m_trainingCppRadio(nullptr)        // Инициализация
+    , m_appLanguageGroup(nullptr)
+    , m_trainingLanguageGroup(nullptr)
+    , m_trainingAssemblyRadio(nullptr)
+    , m_trainingCppRadio(nullptr)
+    , m_appLanguageGroupBox(nullptr)
+    , m_trainingLanguageGroupBox(nullptr)
+    , m_trainingGroupBox(nullptr)
+    , m_learningGroupBox(nullptr)
+    , m_shortWordsLabel(nullptr)
+    , m_longWordsLabel(nullptr)
+    , m_punctuationLabel(nullptr)
+    , m_numbersLabel(nullptr)
+    , m_quotesLabel(nullptr)
+    , m_highlightLabel(nullptr)
+    , m_keyboardLabel(nullptr)
 {
-    setWindowTitle("Настройки");
     setModal(true);
-    setFixedSize(400, 650); // Увеличили высоту для новых кнопок
+    setFixedSize(400, 650);
     setStyleSheet(R"(
     SettingsDialog {
         background-color: #1a1a1a;
@@ -66,17 +76,20 @@
     initializeUI();
     loadSettings();
     saveInitialStates();
+    if (m_currentState.appLanguage == "english")
+        translateToEnglish();
+    else
+        translateToRussian();
 }
 
 void SettingsDialog::closeEvent(QCloseEvent *event)
 {
-    // Сохраняем текущие состояния перед сравнением
     int trainingLangId = m_trainingLanguageGroup->checkedId();
     switch(trainingLangId) {
     case 0: m_currentState.trainingLanguage = "русский"; break;
     case 1: m_currentState.trainingLanguage = "english"; break;
-    case 2: m_currentState.trainingLanguage = "assembly"; break; // Добавлено
-    case 3: m_currentState.trainingLanguage = "c++"; break;     // Добавлено
+    case 2: m_currentState.trainingLanguage = "assembly"; break;
+    case 3: m_currentState.trainingLanguage = "c++"; break;
     }
 
     m_currentState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
@@ -105,14 +118,12 @@ void SettingsDialog::loadSettings()
 void SettingsDialog::applySettings(const Settings& settings)
 {
     qDebug() << "bbb\n";
-    // Устанавливаем язык приложения
     if (settings.appLanguage == "русский") {
         m_appRussianRadio->setChecked(true);
     } else {
         m_appEnglishRadio->setChecked(true);
     }
 
-    // Устанавливаем язык обучения
     qDebug() << settings.trainingLanguage << '\n';
     if (settings.trainingLanguage == "русский") {
         m_trainingRussianRadio->setChecked(true);
@@ -121,21 +132,19 @@ void SettingsDialog::applySettings(const Settings& settings)
         m_trainingEnglishRadio->setChecked(true);
         qDebug() << "AAA";
     } else if (settings.trainingLanguage == "assembly") {
-            m_trainingAssemblyRadio->setChecked(true);
+        m_trainingAssemblyRadio->setChecked(true);
         qDebug() << "AAA";
-    } else if (settings.trainingLanguage == "c++" ) {
-            m_trainingCppRadio->setChecked(true);
+    } else if (settings.trainingLanguage == "c++") {
+        m_trainingCppRadio->setChecked(true);
         qDebug() << "AAA";
     }
 
-    // Устанавливаем настройки тренировки
     m_shortWordsToggle->setChecked(settings.shortWords);
     m_longWordsToggle->setChecked(settings.longWords);
     m_punctuationToggle->setChecked(settings.punctuation);
     m_numbersToggle->setChecked(settings.numbers);
     m_quotesToggle->setChecked(settings.quotes);
 
-    // Устанавливаем настройки обучения
     m_highlightToggle->setChecked(settings.highlight);
     m_keyboardToggle->setChecked(settings.keyboard);
 }
@@ -144,7 +153,6 @@ void SettingsDialog::saveSettings()
 {
     const QString SETTINGS_FILE_PATH = "tmp/settings.json";
 
-    // Создаем директорию, если она не существует
     QDir dir;
     if (!dir.exists("tmp")) {
         if (!dir.mkpath("tmp")) {
@@ -171,8 +179,8 @@ void SettingsDialog::saveInitialStates()
     switch(trainingLangId) {
     case 0: m_initialState.trainingLanguage = "русский"; break;
     case 1: m_initialState.trainingLanguage = "english"; break;
-    case 2: m_initialState.trainingLanguage = "assembly"; break; // Добавлено
-    case 3: m_initialState.trainingLanguage = "c++"; break;     // Добавлено
+    case 2: m_initialState.trainingLanguage = "assembly"; break;
+    case 3: m_initialState.trainingLanguage = "c++"; break;
     }
 
     m_initialState.appLanguage = (m_appLanguageGroup->checkedId() == 0) ? "русский" : "english";
@@ -239,14 +247,13 @@ void SettingsDialog::initializeUI()
 
 void SettingsDialog::createAppLanguageSettings()
 {
-    QGroupBox *appLanguageGroup = new QGroupBox("Язык приложения / Application language", this);
-    QVBoxLayout *layout = new QVBoxLayout(appLanguageGroup);
+    m_appLanguageGroupBox = new QGroupBox("Язык приложения", this);
+    QVBoxLayout *layout = new QVBoxLayout(m_appLanguageGroupBox);
 
     m_appLanguageGroup = new QButtonGroup(this);
-    m_appRussianRadio = new QRadioButton("Русский", appLanguageGroup);
-    m_appEnglishRadio = new QRadioButton("English", appLanguageGroup);
+    m_appRussianRadio = new QRadioButton("Русский", m_appLanguageGroupBox);
+    m_appEnglishRadio = new QRadioButton("English", m_appLanguageGroupBox);
 
-    // По умолчанию русский
     m_appRussianRadio->setChecked(true);
 
     m_appLanguageGroup->addButton(m_appRussianRadio, 0);
@@ -261,27 +268,26 @@ void SettingsDialog::createAppLanguageSettings()
     layout->addWidget(m_appEnglishRadio);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(0, appLanguageGroup);
+    mainLayout->insertWidget(0, m_appLanguageGroupBox);
 }
 
 void SettingsDialog::createTrainingLanguageSettings()
 {
-    QGroupBox *trainingLanguageGroup = new QGroupBox("Язык обучения", this);
-    QVBoxLayout *layout = new QVBoxLayout(trainingLanguageGroup);
+    m_trainingLanguageGroupBox = new QGroupBox("Язык обучения", this);
+    QVBoxLayout *layout = new QVBoxLayout(m_trainingLanguageGroupBox);
 
     m_trainingLanguageGroup = new QButtonGroup(this);
-    m_trainingRussianRadio = new QRadioButton("Русский", trainingLanguageGroup);
-    m_trainingEnglishRadio = new QRadioButton("Английский", trainingLanguageGroup);
-    m_trainingAssemblyRadio = new QRadioButton("Assembly", trainingLanguageGroup);    // Добавлено
-    m_trainingCppRadio = new QRadioButton("C++", trainingLanguageGroup);             // Добавлено
+    m_trainingRussianRadio = new QRadioButton("Русский", m_trainingLanguageGroupBox);
+    m_trainingEnglishRadio = new QRadioButton("Английский", m_trainingLanguageGroupBox);
+    m_trainingAssemblyRadio = new QRadioButton("Assembly", m_trainingLanguageGroupBox);
+    m_trainingCppRadio = new QRadioButton("C++", m_trainingLanguageGroupBox);
 
-    // По умолчанию русский
     m_trainingRussianRadio->setChecked(true);
 
     m_trainingLanguageGroup->addButton(m_trainingRussianRadio, 0);
     m_trainingLanguageGroup->addButton(m_trainingEnglishRadio, 1);
-    m_trainingLanguageGroup->addButton(m_trainingAssemblyRadio, 2);  // Добавлено
-    m_trainingLanguageGroup->addButton(m_trainingCppRadio, 3);       // Добавлено
+    m_trainingLanguageGroup->addButton(m_trainingAssemblyRadio, 2);
+    m_trainingLanguageGroup->addButton(m_trainingCppRadio, 3);
 
     connect(m_trainingLanguageGroup, &QButtonGroup::buttonToggled, [this](QAbstractButton *button, bool checked) {
         int id = m_trainingLanguageGroup->id(button);
@@ -290,58 +296,55 @@ void SettingsDialog::createTrainingLanguageSettings()
 
     layout->addWidget(m_trainingRussianRadio);
     layout->addWidget(m_trainingEnglishRadio);
-    layout->addWidget(m_trainingAssemblyRadio);  // Добавлено
-    layout->addWidget(m_trainingCppRadio);       // Добавлено
+    layout->addWidget(m_trainingAssemblyRadio);
+    layout->addWidget(m_trainingCppRadio);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(1, trainingLanguageGroup);
+    mainLayout->insertWidget(1, m_trainingLanguageGroupBox);
 }
 
 void SettingsDialog::createTrainingSettings()
 {
-    QGroupBox *trainingGroup = new QGroupBox("Режим тренировки", this);
-    QVBoxLayout *layout = new QVBoxLayout(trainingGroup);
+    m_trainingGroupBox = new QGroupBox("Режим тренировки", this);
+    QVBoxLayout *layout = new QVBoxLayout(m_trainingGroupBox);
 
-    // Создаем свитчеры для всех опций тренировки
     QHBoxLayout *shortWordsLayout = new QHBoxLayout();
-    QLabel *shortWordsLabel = new QLabel("Короткие слова", trainingGroup);
-    m_shortWordsToggle = new ToggleSwitch(trainingGroup);
-    shortWordsLayout->addWidget(shortWordsLabel);
+    m_shortWordsLabel = new QLabel("Короткие слова", m_trainingGroupBox);
+    m_shortWordsToggle = new ToggleSwitch(m_trainingGroupBox);
+    shortWordsLayout->addWidget(m_shortWordsLabel);
     shortWordsLayout->addStretch();
     shortWordsLayout->addWidget(m_shortWordsToggle);
 
     QHBoxLayout *longWordsLayout = new QHBoxLayout();
-    QLabel *longWordsLabel = new QLabel("Длинные слова", trainingGroup);
-    m_longWordsToggle = new ToggleSwitch(trainingGroup);
-    longWordsLayout->addWidget(longWordsLabel);
+    m_longWordsLabel = new QLabel("Длинные слова", m_trainingGroupBox);
+    m_longWordsToggle = new ToggleSwitch(m_trainingGroupBox);
+    longWordsLayout->addWidget(m_longWordsLabel);
     longWordsLayout->addStretch();
     longWordsLayout->addWidget(m_longWordsToggle);
 
     QHBoxLayout *punctuationLayout = new QHBoxLayout();
-    QLabel *punctuationLabel = new QLabel("Пунктуация", trainingGroup);
-    m_punctuationToggle = new ToggleSwitch(trainingGroup);
-    punctuationLayout->addWidget(punctuationLabel);
+    m_punctuationLabel = new QLabel("Пунктуация", m_trainingGroupBox);
+    m_punctuationToggle = new ToggleSwitch(m_trainingGroupBox);
+    punctuationLayout->addWidget(m_punctuationLabel);
     punctuationLayout->addStretch();
     punctuationLayout->addWidget(m_punctuationToggle);
 
     QHBoxLayout *numbersLayout = new QHBoxLayout();
-    QLabel *numbersLabel = new QLabel("Цифры", trainingGroup);
-    m_numbersToggle = new ToggleSwitch(trainingGroup);
-    numbersLayout->addWidget(numbersLabel);
+    m_numbersLabel = new QLabel("Цифры", m_trainingGroupBox);
+    m_numbersToggle = new ToggleSwitch(m_trainingGroupBox);
+    numbersLayout->addWidget(m_numbersLabel);
     numbersLayout->addStretch();
     numbersLayout->addWidget(m_numbersToggle);
 
     QHBoxLayout *quotesLayout = new QHBoxLayout();
-    QLabel *quotesLabel = new QLabel("Цитаты", trainingGroup);
-    m_quotesToggle = new ToggleSwitch(trainingGroup);
-    quotesLayout->addWidget(quotesLabel);
+    m_quotesLabel = new QLabel("Цитаты", m_trainingGroupBox);
+    m_quotesToggle = new ToggleSwitch(m_trainingGroupBox);
+    quotesLayout->addWidget(m_quotesLabel);
     quotesLayout->addStretch();
     quotesLayout->addWidget(m_quotesToggle);
 
-    // По умолчанию включаем "Короткие слова"
     m_shortWordsToggle->setChecked(true);
 
-    // Подключаем сигналы
     connect(m_shortWordsToggle, &ToggleSwitch::toggled, this, &SettingsDialog::onShortWordsToggled);
     connect(m_longWordsToggle, &ToggleSwitch::toggled, this, &SettingsDialog::onLongWordsToggled);
     connect(m_punctuationToggle, &ToggleSwitch::toggled, this, &SettingsDialog::onPunctuationToggled);
@@ -355,33 +358,30 @@ void SettingsDialog::createTrainingSettings()
     layout->addLayout(quotesLayout);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(2, trainingGroup);
+    mainLayout->insertWidget(2, m_trainingGroupBox);
 }
 
 void SettingsDialog::createLearningSettings()
 {
-    QGroupBox *learningGroup = new QGroupBox("Общие настройки", this);
-    QVBoxLayout *layout = new QVBoxLayout(learningGroup);
+    m_learningGroupBox = new QGroupBox("Общие настройки", this);
+    QVBoxLayout *layout = new QVBoxLayout(m_learningGroupBox);
 
-    // Ладони свитчер
     QHBoxLayout *highlightLayout = new QHBoxLayout();
-    QLabel *highlightLabel = new QLabel("Ладони:", learningGroup);
-    m_highlightToggle = new ToggleSwitch(learningGroup);
+    m_highlightLabel = new QLabel("Ладони:", m_learningGroupBox);
+    m_highlightToggle = new ToggleSwitch(m_learningGroupBox);
 
-    // Клавиатура свитчер
     QHBoxLayout *keyboardLayout = new QHBoxLayout();
-    QLabel *keyboardLabel = new QLabel("Клавиатура:", learningGroup);
-    m_keyboardToggle = new ToggleSwitch(learningGroup);
+    m_keyboardLabel = new QLabel("Клавиатура:", m_learningGroupBox);
+    m_keyboardToggle = new ToggleSwitch(m_learningGroupBox);
 
-    highlightLayout->addWidget(highlightLabel);
+    highlightLayout->addWidget(m_highlightLabel);
     highlightLayout->addStretch();
     highlightLayout->addWidget(m_highlightToggle);
 
-    keyboardLayout->addWidget(keyboardLabel);
+    keyboardLayout->addWidget(m_keyboardLabel);
     keyboardLayout->addStretch();
     keyboardLayout->addWidget(m_keyboardToggle);
 
-    // Подключаем сигналы
     connect(m_highlightToggle, &ToggleSwitch::toggled, this, &SettingsDialog::onHighlightToggleClicked);
     connect(m_keyboardToggle, &ToggleSwitch::toggled, this, &SettingsDialog::onKeyboardToggleClicked);
 
@@ -389,13 +389,12 @@ void SettingsDialog::createLearningSettings()
     layout->addLayout(keyboardLayout);
 
     QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(this->layout());
-    mainLayout->insertWidget(3, learningGroup);
+    mainLayout->insertWidget(3, m_learningGroupBox);
 }
 
 void SettingsDialog::updateQuotesState(bool checked)
 {
     if (checked) {
-        // Если включаем "Цитаты", выключаем все остальные
         m_shortWordsToggle->setChecked(false);
         m_longWordsToggle->setChecked(false);
         m_punctuationToggle->setChecked(false);
@@ -405,8 +404,14 @@ void SettingsDialog::updateQuotesState(bool checked)
 
 void SettingsDialog::onAppLanguageToggled(int id, bool checked)
 {
-    Q_UNUSED(id)
     Q_UNUSED(checked)
+    if (id == 0) {
+        m_currentState.appLanguage = "русский";
+        translateToRussian();
+    } else if (id == 1) {
+        m_currentState.appLanguage = "english";
+        translateToEnglish();
+    }
 }
 
 void SettingsDialog::onTrainingLanguageToggled(int id, bool checked)
@@ -456,4 +461,100 @@ void SettingsDialog::onHighlightToggleClicked(bool checked)
 void SettingsDialog::onKeyboardToggleClicked(bool checked)
 {
     Q_UNUSED(checked)
+}
+
+void SettingsDialog::translateToRussian()
+{
+    if (m_appLanguageGroupBox) {
+        m_appLanguageGroupBox->setTitle("Язык приложения");
+    }
+
+    if (m_trainingLanguageGroupBox) {
+        m_trainingLanguageGroupBox->setTitle("Язык обучения");
+    }
+
+    if (m_trainingGroupBox) {
+        m_trainingGroupBox->setTitle("Режим тренировки");
+    }
+
+    if (m_learningGroupBox) {
+        m_learningGroupBox->setTitle("Общие настройки");
+    }
+
+    if (m_trainingRussianRadio) {
+        m_trainingRussianRadio->setText("Русский");
+    }
+    if (m_trainingEnglishRadio) {
+        m_trainingEnglishRadio->setText("Английский");
+    }
+
+    if (m_shortWordsLabel) {
+        m_shortWordsLabel->setText("Короткие слова");
+    }
+    if (m_longWordsLabel) {
+        m_longWordsLabel->setText("Длинные слова");
+    }
+    if (m_punctuationLabel) {
+        m_punctuationLabel->setText("Пунктуация");
+    }
+    if (m_numbersLabel) {
+        m_numbersLabel->setText("Цифры");
+    }
+    if (m_quotesLabel) {
+        m_quotesLabel->setText("Цитаты");
+    }
+    if (m_highlightLabel) {
+        m_highlightLabel->setText("Ладони:");
+    }
+    if (m_keyboardLabel) {
+        m_keyboardLabel->setText("Клавиатура:");
+    }
+}
+
+void SettingsDialog::translateToEnglish()
+{
+    if (m_appLanguageGroupBox) {
+        m_appLanguageGroupBox->setTitle("Application language");
+    }
+
+    if (m_trainingLanguageGroupBox) {
+        m_trainingLanguageGroupBox->setTitle("Language of instruction");
+    }
+
+    if (m_trainingGroupBox) {
+        m_trainingGroupBox->setTitle("Training mode");
+    }
+
+    if (m_learningGroupBox) {
+        m_learningGroupBox->setTitle("General settings");
+    }
+
+    if (m_trainingRussianRadio) {
+        m_trainingRussianRadio->setText("Russian");
+    }
+    if (m_trainingEnglishRadio) {
+        m_trainingEnglishRadio->setText("English");
+    }
+
+    if (m_shortWordsLabel) {
+        m_shortWordsLabel->setText("Short words");
+    }
+    if (m_longWordsLabel) {
+        m_longWordsLabel->setText("Long words");
+    }
+    if (m_punctuationLabel) {
+        m_punctuationLabel->setText("Punctuation");
+    }
+    if (m_numbersLabel) {
+        m_numbersLabel->setText("Numbers");
+    }
+    if (m_quotesLabel) {
+        m_quotesLabel->setText("Quotes");
+    }
+    if (m_highlightLabel) {
+        m_highlightLabel->setText("Hands:");
+    }
+    if (m_keyboardLabel) {
+        m_keyboardLabel->setText("Keyboard:");
+    }
 }

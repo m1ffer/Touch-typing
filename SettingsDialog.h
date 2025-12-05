@@ -12,13 +12,14 @@
 #include "ToggleSwitch.h"
 #include "JSONParser.h"
 
-              class SettingsDialog : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     Settings getCurrentSettings() const { return m_currentState; }
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -33,7 +34,6 @@ private slots:
     void onHighlightToggleClicked(bool checked);
     void onKeyboardToggleClicked(bool checked);
 
-
 private:
     void applySettings(const Settings&);
     void initializeUI();
@@ -46,6 +46,9 @@ private:
     void compareStates();
     void loadSettings();
     void saveSettings();
+    void translateToRussian();
+    void translateToEnglish();
+    void updateAllTexts(); // Новая функция для обновления всех текстов
 
     Settings m_initialState;
     Settings m_currentState;
@@ -57,8 +60,8 @@ private:
     QButtonGroup *m_trainingLanguageGroup;
     QRadioButton *m_trainingRussianRadio;
     QRadioButton *m_trainingEnglishRadio;
-    QRadioButton *m_trainingAssemblyRadio;    // Добавлено
-    QRadioButton *m_trainingCppRadio;        // Добавлено
+    QRadioButton *m_trainingAssemblyRadio;
+    QRadioButton *m_trainingCppRadio;
 
     ToggleSwitch *m_shortWordsToggle;
     ToggleSwitch *m_longWordsToggle;
@@ -68,6 +71,21 @@ private:
 
     ToggleSwitch *m_highlightToggle;
     ToggleSwitch *m_keyboardToggle;
+
+    // Указатели на группы для обновления текста
+    QGroupBox *m_appLanguageGroupBox;
+    QGroupBox *m_trainingLanguageGroupBox;
+    QGroupBox *m_trainingGroupBox;
+    QGroupBox *m_learningGroupBox;
+
+    // Указатели на метки
+    QLabel *m_shortWordsLabel;
+    QLabel *m_longWordsLabel;
+    QLabel *m_punctuationLabel;
+    QLabel *m_numbersLabel;
+    QLabel *m_quotesLabel;
+    QLabel *m_highlightLabel;
+    QLabel *m_keyboardLabel;
 };
 
 #endif // SETTINGSDIALOG_H

@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
             background-color: #1a1a1a;
         }
     )");*/
-    m_currentMode = ui -> trainButton->text();
+    m_currentMode = "training";
     m_settingsDialog = new SettingsDialog(this);
     m_currentSettings = m_settingsDialog->getCurrentSettings();
     updateTrainingText();
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(input, &TypingInput::timerUpdated, this, &MainWindow::onTypingTimerUpdated);
     // Устанавливаем начальную страницу
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
-    m_currentMode = ui -> trainButton-> text();
+    m_currentMode = "training";
     initializeLessonMap();
     qDebug() << "bebebe";
     ui -> typingInput -> setKeyboard(ui -> keyboard);
@@ -98,7 +98,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui -> rightHand -> setImage("../../res/rightHand.png");
     if (!m_currentSettings.highlight)
         disableHands();
-
+    if(m_currentSettings.appLanguage == "english")
+        translateToEnglish();
+    else
+        translateToRussian();
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
@@ -173,7 +176,7 @@ void MainWindow::applyButtonStyle()
 void MainWindow::onTrainModeClicked()
 {
     qDebug() << "Режим тренировки активирован";
-    if (m_currentMode == ui -> trainButton -> text() && !(ui -> modesStackedWidget -> currentWidget() == ui -> choseMode))
+    if (m_currentMode == "training" && !(ui -> modesStackedWidget -> currentWidget() == ui -> choseMode))
         updateTrainingText();
     else
         switchToTrainingMode();
@@ -186,7 +189,10 @@ void MainWindow::onLearnModeClicked()
     if(lessons[m_currentSettings.trainingLanguage].empty()){
         qDebug() << "Для текущего языка уроков нет, переключение не произошло";
         //вывести соо
-        MessageHelper::showWarning(this, "Предупреждение", "Для выбранного языка нет уроков");
+        if (m_currentSettings.appLanguage == "русский")
+            MessageHelper::showWarning(this, "Предупреждение", "Для выбранного языка нет уроков.");
+        else
+            MessageHelper::showWarning(this, "Warning", "There are no lessons for the selected language.");
     }
     else{
         qDebug() << "Режим обучения активирован";
@@ -202,7 +208,7 @@ void MainWindow::switchToTrainingMode()
     // Переключаем modesStackedWidget на страницу inputMode
     ui->modesStackedWidget->setCurrentWidget(ui->inputMode);
     updateTrainingText();
-    m_currentMode = ui -> trainButton-> text();
+    m_currentMode = "training";
     qDebug() << "Переключено на страницу тренировки (inputMode)";
 }
 
@@ -337,7 +343,7 @@ int findFirstNum(const QString& str) {
 void MainWindow::onLessonSelected(const QString &text, const QVariant &data)
 {
     ui->modesStackedWidget->setCurrentWidget(ui -> inputMode);
-    m_currentMode = ui -> learnButton -> text();
+    m_currentMode = "learning";
     int lessonId = findFirstNum(text);
     m_currentLessonId = lessonId; // ДОБАВЛЕНО: Сохраняем ID текущего урока
 
@@ -453,7 +459,7 @@ void MainWindow::onStatsNextRequested()
     qDebug() << "Обработка кнопки 'Дальше'";
     // Можно добавить логику перехода к следующему уроку
     // или другой функционал в будущем
-    if (m_currentMode == ui -> trainButton -> text()){
+    if (m_currentMode == "training"){
         updateTrainingText();
     }
     else{
@@ -498,10 +504,11 @@ void MainWindow::onSettingsButtonClicked()
 
     if (trainingSettingsChanged)
     {
+        qDebug() << "ababa";
         if (oldSettings.trainingLanguage != m_currentSettings.trainingLanguage){
             initializeLessons();
         }
-        if (m_currentMode == ui -> trainButton -> text()) {
+        if (m_currentMode == "training") {
             qDebug() << "Настройки тренировки изменились, обновляем текст";
             updateTrainingText();
         }
@@ -519,6 +526,10 @@ void MainWindow::onSettingsButtonClicked()
             enableHands();
         if (oldSettings.keyboard && !m_currentSettings.highlight)
             disableHands();
+        if (oldSettings.appLanguage == "english" && m_currentSettings.appLanguage == "русский")
+            translateToRussian();
+        if (oldSettings.appLanguage == "русский" && m_currentSettings.appLanguage == "english")
+            translateToEnglish();
 }
 
 // ДОБАВЛЕНО: Метод для обновления текста тренировки
@@ -566,5 +577,20 @@ void MainWindow::disableHands(){
 }
 
 void MainWindow::onInfoButtonClicked(){
-    MessageHelper::showInfo(this, "Информация", "Разработчик: Строгонов Никита Дмитриевич.\nНомер группы: 451001\nКафедра: Программное обеспечение программных технологий");
+    if (m_currentSettings.appLanguage == "русский")
+        MessageHelper::showInfo(this, "Информация", "Разработчик: Строгонов Никита Дмитриевич.\nНомер группы: 451001\nКафедра: Программное обеспечение программных технологий");
+    else
+        MessageHelper::showInfo(this, "Information", "Developer: Nikita Dmitrievich Strogonov. \nGroup number: 451001\n Department: Software and Software Technologies");
+}
+
+void MainWindow::translateToRussian(){
+    ui -> trainButton -> setText("Тренировка");
+    ui -> learnButton -> setText("Уроки");
+    ui -> typingInput -> translateToRussian();
+}
+
+void MainWindow::translateToEnglish(){
+    ui -> trainButton -> setText("Training");
+    ui -> learnButton -> setText("Lessons");
+    ui -> typingInput -> translateToEnglish();
 }

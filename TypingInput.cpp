@@ -31,7 +31,8 @@ TypingInput::TypingInput(QWidget *parent)
     m_timerActive(false),
     m_finalTimeMs(0),
     keyboard(nullptr),
-    m_gen(m_rd())
+    m_gen(m_rd()),
+    m_appLanguage("")
 {
     initializeStandartText();
     // Настройка внешнего вида
@@ -762,12 +763,18 @@ void TypingInput::initializeStandartText() {
 
 void TypingInput::setLesson(const unsigned int lessonId, const String& currentLang){
     if (lessons[currentLang].empty()){
-        MessageHelper::showError(this, "Ошибка", "Для выбранного языка нет уроков");
+        if (m_appLanguage == "русский")
+            MessageHelper::showError(this, "Ошибка", "Для выбранного языка нет уроков.");
+        else
+            MessageHelper::showError(this,"Error", "There are no lessons for the selected language.");
         reset();
         return;
     }
     if (lessonId >= lessons[currentLang].size()){
-        MessageHelper::showError(this, "Ошибка", "Непредвиденная ошибка. Попробуйте выбрать урок вручную");
+        if (m_appLanguage == "русский")
+            MessageHelper::showError(this, "Ошибка", "Непредвиденная ошибка. Попробуйте выбрать урок вручную.");
+        else
+            MessageHelper::showError(this, "Error", "An unexpected error occurred. Please try selecting a lesson manually.");
         reset();
         return;
     }
@@ -801,4 +808,12 @@ void TypingInput::enableKeyboard(){
 
 void TypingInput::disableKeyboard(){
     keyboard -> disable();
+}
+
+void TypingInput::translateToEnglish(){
+    m_appLanguage = "english";
+}
+
+void TypingInput::translateToRussian(){
+    m_appLanguage = "русский";
 }

@@ -69,6 +69,8 @@ public:
     void setLesson(const unsigned int lessonId, const String& currentLang);
     void initializeLessons(const std::map<String, std::vector<Lesson>>& mp);
     void highlight();
+    void translateToEnglish();
+    void translateToRussian();
 signals:
     void textChanged(const QString &inputText);
     void inputCompleted();
@@ -139,13 +141,14 @@ private:
     QString capitalizeWord(const QString& word);
     QString addPunctuation(const QString& word);
     QString addNumber(const QString& word);
-
+    QString m_appLanguage;
     // ДОБАВЛЕНО: Генератор случайных чисел
     std::random_device m_rd;
     std::mt19937 m_gen;
     const std::string PATH_TO_STANDART_TEXT = "../../res/languages/standartText";
     std::map<String, String> standartText;
     KeyboardWidget *keyboard;
+
 };
 
 #endif // TYPINGINPUT_H

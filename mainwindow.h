@@ -57,6 +57,8 @@ private:
     std::map<String, QStringList> lessons;
     void enableHands();
     void disableHands();
+    void translateToRussian();
+    void translateToEnglish();
 };
 
 #endif // MAINWINDOW_H
