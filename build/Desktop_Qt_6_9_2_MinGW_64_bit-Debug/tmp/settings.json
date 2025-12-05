@@ -6,6 +6,6 @@
   "punctuation": false,
   "numbers": false,
   "quotes": false,
-  "highlight": false,
+  "highlight": true,
   "keyboard": true
 }

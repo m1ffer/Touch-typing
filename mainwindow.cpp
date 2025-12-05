@@ -93,6 +93,10 @@ MainWindow::MainWindow(QWidget *parent)
         ui -> keyboard -> disable();
     else
         ui ->keyboard ->enable();
+    ui -> leftHand -> setImage("../../res/leftHand.png");
+    ui -> rightHand -> setImage("../../res/rightHand.png");
+    if (!m_currentSettings.highlight)
+        disableHands();
     qDebug() << "=== Завершение инициализации MainWindow ===";
 }
 
@@ -509,6 +513,10 @@ void MainWindow::onSettingsButtonClicked()
         if (oldSettings.keyboard && !m_currentSettings.keyboard){
             ui -> typingInput -> disableKeyboard();
         }
+        if (!oldSettings.highlight && m_currentSettings.highlight)
+            enableHands();
+        if (oldSettings.keyboard && !m_currentSettings.highlight)
+            disableHands();
 }
 
 // ДОБАВЛЕНО: Метод для обновления текста тренировки
@@ -545,3 +553,12 @@ void MainWindow::initializeLessonMap(){
     ui -> typingInput -> initializeLessons(mp);
 }
 
+void MainWindow::enableHands(){
+    ui -> leftHand -> enable();
+    ui -> rightHand -> enable();
+}
+
+void MainWindow::disableHands(){
+    ui -> leftHand -> disable();
+    ui -> rightHand -> disable();
+}

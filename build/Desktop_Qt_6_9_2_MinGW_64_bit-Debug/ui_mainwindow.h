@@ -24,6 +24,7 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <ReservedImageWidget.h>
 #include <ScrollButtonWidget.h>
 #include <TypingInput.h>
 
@@ -39,9 +40,9 @@ public:
     QWidget *page;
     QGridLayout *gridLayout_4;
     QGridLayout *gridLayout_3;
-    QSpacerItem *horizontalSpacer;
+    ReservedImageWidget *leftHand;
     QGridLayout *gridLayout_11;
-    QSpacerItem *horizontalSpacer_2;
+    ReservedImageWidget *rightHand;
     QGridLayout *gridLayout_12;
     QGridLayout *gridLayout_14;
     QStackedWidget *modesStackedWidget;
@@ -105,18 +106,20 @@ public:
         gridLayout_4->setObjectName("gridLayout_4");
         gridLayout_3 = new QGridLayout();
         gridLayout_3->setObjectName("gridLayout_3");
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        leftHand = new ReservedImageWidget(page);
+        leftHand->setObjectName("leftHand");
 
-        gridLayout_3->addItem(horizontalSpacer, 0, 0, 1, 1);
+        gridLayout_3->addWidget(leftHand, 0, 0, 1, 1);
 
 
         gridLayout_4->addLayout(gridLayout_3, 0, 0, 1, 1);
 
         gridLayout_11 = new QGridLayout();
         gridLayout_11->setObjectName("gridLayout_11");
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        rightHand = new ReservedImageWidget(page);
+        rightHand->setObjectName("rightHand");
 
-        gridLayout_11->addItem(horizontalSpacer_2, 0, 0, 1, 1);
+        gridLayout_11->addWidget(rightHand, 0, 0, 1, 1);
 
 
         gridLayout_4->addLayout(gridLayout_11, 0, 2, 1, 1);

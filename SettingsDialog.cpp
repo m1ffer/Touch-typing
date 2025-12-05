@@ -216,7 +216,7 @@ void SettingsDialog::compareStates()
     }
 
     if (m_initialState.highlight != m_currentState.highlight) {
-        qDebug() << "Подсветка:" << m_initialState.highlight << "->" << m_currentState.highlight;
+        qDebug() << "Ладони:" << m_initialState.highlight << "->" << m_currentState.highlight;
     }
     if (m_initialState.keyboard != m_currentState.keyboard) {
         qDebug() << "Клавиатура:" << m_initialState.keyboard << "->" << m_currentState.keyboard;
@@ -360,12 +360,12 @@ void SettingsDialog::createTrainingSettings()
 
 void SettingsDialog::createLearningSettings()
 {
-    QGroupBox *learningGroup = new QGroupBox("Режим обучения", this);
+    QGroupBox *learningGroup = new QGroupBox("Общие настройки", this);
     QVBoxLayout *layout = new QVBoxLayout(learningGroup);
 
-    // Подсветка свитчер
+    // Ладони свитчер
     QHBoxLayout *highlightLayout = new QHBoxLayout();
-    QLabel *highlightLabel = new QLabel("Подсветка:", learningGroup);
+    QLabel *highlightLabel = new QLabel("Ладони:", learningGroup);
     m_highlightToggle = new ToggleSwitch(learningGroup);
 
     // Клавиатура свитчер

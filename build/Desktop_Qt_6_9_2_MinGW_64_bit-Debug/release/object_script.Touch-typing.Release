@@ -2,6 +2,7 @@ release/ControlButton.o
 release/JSONParser.o
 release/KeyboardWidget.o
 release/MessageHelper.o
+release/ReservedImageWidget.o
 release/ScrollButtonWidget.o
 release/SettingsDialog.o
 release/StatisticsWidget.o
@@ -12,6 +13,7 @@ release/mainwindow.o
 release/qrc_resources.o
 release/moc_ControlButton.o
 release/moc_KeyboardWidget.o
+release/moc_ReservedImageWidget.o
 release/moc_ScrollButtonWidget.o
 release/moc_SettingsDialog.o
 release/moc_StatisticsWidget.o

@@ -33,34 +33,14 @@
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="0">
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
+             <widget class="ReservedImageWidget" name="leftHand" native="true"/>
             </item>
            </layout>
           </item>
           <item row="0" column="2">
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="0" column="0">
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
+             <widget class="ReservedImageWidget" name="rightHand" native="true"/>
             </item>
            </layout>
           </item>
@@ -360,6 +340,12 @@
    <class>KeyboardWidget</class>
    <extends>QWidget</extends>
    <header location="global">KeyboardWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ReservedImageWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ReservedImageWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

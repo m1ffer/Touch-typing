@@ -54,6 +54,8 @@ private:
     // ДОБАВЛЕНО: Текущие настройки
     Settings m_currentSettings;
     std::map<String, QStringList> lessons;
+    void enableHands();
+    void disableHands();
 };
 
 #endif // MAINWINDOW_H

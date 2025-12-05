@@ -35,7 +35,7 @@ void ScrollButtonWidget::addButton(const QString &text, const QVariant &data)
     QPushButton *button = new QPushButton(text, m_contentWidget);
     button->setProperty("buttonData", data);
     button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    button->setMinimumHeight(35);
+    button->setMinimumHeight(45);
 
     QString buttonStyle = R"(
         QPushButton {
@@ -46,7 +46,7 @@ void ScrollButtonWidget::addButton(const QString &text, const QVariant &data)
             text-align: left;
             border-radius: 0px;
             font-family: 'Roboto Mono', 'Consolas', monospace;
-            font-size: 13px;
+            font-size: 16px;
             margin: 2px 0px;
         }
         QPushButton:hover {

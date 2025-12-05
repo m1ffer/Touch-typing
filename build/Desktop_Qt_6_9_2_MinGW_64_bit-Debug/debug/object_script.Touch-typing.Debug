@@ -2,6 +2,7 @@ debug/ControlButton.o
 debug/JSONParser.o
 debug/KeyboardWidget.o
 debug/MessageHelper.o
+debug/ReservedImageWidget.o
 debug/ScrollButtonWidget.o
 debug/SettingsDialog.o
 debug/StatisticsWidget.o
@@ -12,6 +13,7 @@ debug/mainwindow.o
 debug/qrc_resources.o
 debug/moc_ControlButton.o
 debug/moc_KeyboardWidget.o
+debug/moc_ReservedImageWidget.o
 debug/moc_ScrollButtonWidget.o
 debug/moc_SettingsDialog.o
 debug/moc_StatisticsWidget.o

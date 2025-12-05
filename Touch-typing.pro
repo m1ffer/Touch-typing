@@ -9,6 +9,7 @@ SOURCES += \
     JSONParser.cpp \
     KeyboardWidget.cpp \
     MessageHelper.cpp \
+    ReservedImageWidget.cpp \
     ScrollButtonWidget.cpp \
     SettingsDialog.cpp \
     StatisticsWidget.cpp \
@@ -22,6 +23,7 @@ HEADERS += \
     JSONParser.h \
     KeyboardWidget.h \
     MessageHelper.h \
+    ReservedImageWidget.h \
     ScrollButtonWidget.h \
     SettingsDialog.h \
     StatisticsWidget.h \
